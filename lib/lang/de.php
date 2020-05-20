@@ -41,4 +41,11 @@ const LANG = [
 	'customers' => 'Kunden',
 	'vouchers' => 'Gutscheine',
 	'log_out' => 'Abmelden',
+	'mail_sender' => 'Customer Database Bot',
+	'registration_mail_subject' => 'Kundendatenbank Account-Aktivierung',
+	'registration_mail_text' => 'Vielen Dank, dass Sie einen Kundendatenbank-Account erstellt haben. Bitte klicken Sie auf den folgenden Link, um Ihren Account zu aktivieren.',
+	'password_reset_mail_subject' => 'Kundendatenbank Account-Kennwort zurücksetzen',
+	'password_reset_mail_text' => 'Wenn Sie Ihr Kennwort jetzt zurücksetzen möchten, klicken Sie bitte auf den folgenden Link.',
+	'deletion_mail_subject' => 'Kundendatenbank Account-Löschung',
+	'deletion_mail_text' => 'Wenn Sie Ihren Kundendatenbank-Account jetzt löschen möchten, klicken Sie bitte auf den folgenden Link.',
 ];

@@ -11,10 +11,10 @@ class Account {
 	const ERR_NOT_FOUND        = -5;
 	const ERR_UNKNOWN          = -6;
 
-	const MAIL_HEADERS = [
+	private $MAIL_HEADERS = [
 		'MIME-Version: 1.0',
 		'Content-type: text/plain; charset=utf-8',
-		'From: '.MAIL_SENDER,
+		'From: ' . LANG['mail_sender'] . ' <' . MAIL_SENDER_ADDRESS . '>',
 	];
 
 	function __construct($db) {
@@ -69,11 +69,10 @@ class Account {
 			return $result;
 		}
 		else {
-			mail($username, "Customer Database Account Activation",
-				"Thank you for registering a Customer Database account. Please click on the following link to activate your account.\n\n"
-				."Vielen Dank, dass Sie einen Kundendatenbank-Account erstellt haben. Bitte klicken Sie auf den folgenden Link, um Ihren Account zu aktivieren.\n\n"
+			mail($username, LANG['registration_mail_subject'],
+				LANG['registration_mail_text'] . "\n\n"
 				.WEB_BASE_URL."/frontend/account-activate.php?userid=".$result."&token=".$token,
-				implode("\r\n", self::MAIL_HEADERS)
+				implode("\r\n", $this->MAIL_HEADERS)
 			);
 		}
 		return $result;
@@ -84,11 +83,10 @@ class Account {
 		if(count($result) === 1) {
 			$token = $this->generateRandomString();
 			$this->db->setClientResetToken($result[0]->id, $token);
-			mail($result[0]->email, "Customer Database Account Password Reset",
-				"If you want to reset your password now, please click on the link below.\n\n"
-				."Wenn Sie Ihr Kennwort jetzt zurücksetzen möchten, klicken Sie bitte auf den folgenden Link.\n\n"
+			mail($result[0]->email, LANG['password_reset_mail_subject'],
+				LANG['password_reset_mail_text'] . "\n\n"
 				.WEB_BASE_URL."/frontend/account-resetpwd.php?userid=".$result[0]->id."&token=".$token,
-				implode("\r\n", self::MAIL_HEADERS)
+				implode("\r\n", $this->MAIL_HEADERS)
 			);
 			return 1;
 		}
@@ -103,11 +101,10 @@ class Account {
 		if(count($result) === 1) {
 			$token = $this->generateRandomString();
 			$this->db->setClientDeletionToken($result[0]->id, $token);
-			mail($result[0]->email, "Customer Database Account Deletion",
-				"If you want to delete your Customer Database account now, please click on the link below.\n\n"
-				."Wenn Sie Ihren Kundendatenbank-Account jetzt löschen möchten, klicken Sie bitte auf den folgenden Link.\n\n"
+			mail($result[0]->email, LANG['deletion_mail_subject'],
+				LANG['deletion_mail_text'] . "\n\n"
 				.WEB_BASE_URL."/frontend/account-delete.php?userid=".$result[0]->id."&token=".$token,
-				implode("\r\n", self::MAIL_HEADERS)
+				implode("\r\n", $this->MAIL_HEADERS)
 			);
 			return 1;
 		}

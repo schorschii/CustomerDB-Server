@@ -5,7 +5,7 @@ const FRONTEND_ENABLED      = false;
 const API_ENABLED           = true;
 const REGISTRATION_ENABLED  = true;
 const VERIFY_EMAIL_REQUIRED = false;
-const MAIL_SENDER           = "Customer Database Bot <noreply@customerdb.example.com>";
+const MAIL_SENDER_ADDRESS   = "noreply@customerdb.example.com";
 const WEB_BASE_URL          = "https://customerdb.example.com";
 
 // MySQL Credentials

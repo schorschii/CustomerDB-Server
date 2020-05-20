@@ -41,4 +41,11 @@ const LANG = [
 	'customers' => 'Customers',
 	'vouchers' => 'Vouchers',
 	'log_out' => 'Log Out',
+	'mail_sender' => 'Customer Database Bot',
+	'registration_mail_subject' => 'Customer Database Account Activation',
+	'registration_mail_text' => 'Thank you for registering a Customer Database account. Please click on the following link to activate your account.',
+	'password_reset_mail_subject' => 'Customer Database Account Password Reset',
+	'password_reset_mail_text' => 'If you want to reset your password now, please click on the link below.',
+	'deletion_mail_subject' => 'Customer Database Account Deletion',
+	'deletion_mail_text' => 'If you want to delete your Customer Database account now, please click on the link below.',
 ];
