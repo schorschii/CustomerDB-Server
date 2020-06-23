@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Erstellungszeit: 18. Mrz 2020 um 21:09
+-- Erstellungszeit: 23. Jun 2020 um 15:44
 -- Server-Version: 10.3.22-MariaDB-0+deb10u1
 -- PHP-Version: 7.3.14-1~deb10u1
 
@@ -25,6 +25,43 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
+-- Tabellenstruktur für Tabelle `Appointment`
+--
+
+CREATE TABLE `Appointment` (
+  `client_id` int(11) NOT NULL,
+  `id` bigint(11) NOT NULL,
+  `calendar_id` bigint(11) NOT NULL,
+  `title` text NOT NULL,
+  `notes` text NOT NULL,
+  `time_start` datetime DEFAULT NULL,
+  `time_end` datetime DEFAULT NULL,
+  `fullday` tinyint(4) NOT NULL,
+  `customer` text NOT NULL,
+  `location` text NOT NULL,
+  `last_modified` datetime NOT NULL DEFAULT current_timestamp(),
+  `removed` tinyint(4) NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
+-- Tabellenstruktur für Tabelle `Calendar`
+--
+
+CREATE TABLE `Calendar` (
+  `client_id` int(11) NOT NULL,
+  `id` bigint(11) NOT NULL,
+  `title` text NOT NULL,
+  `color` text NOT NULL,
+  `notes` text NOT NULL,
+  `last_modified` datetime NOT NULL DEFAULT current_timestamp(),
+  `removed` tinyint(4) NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
 -- Tabellenstruktur für Tabelle `Client`
 --
 
@@ -35,7 +72,8 @@ CREATE TABLE `Client` (
   `pending_activation_token` text DEFAULT NULL,
   `pending_reset_token` text DEFAULT NULL,
   `pending_deletion_token` text DEFAULT NULL,
-  `last_login` datetime NOT NULL DEFAULT current_timestamp()
+  `last_login` datetime NOT NULL DEFAULT current_timestamp(),
+  `check_payment` bit(1) NOT NULL DEFAULT b'1'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -96,6 +134,19 @@ CREATE TABLE `Voucher` (
 --
 
 --
+-- Indizes für die Tabelle `Appointment`
+--
+ALTER TABLE `Appointment`
+  ADD PRIMARY KEY (`client_id`,`id`);
+
+--
+-- Indizes für die Tabelle `Calendar`
+--
+ALTER TABLE `Calendar`
+  ADD PRIMARY KEY (`id`,`client_id`),
+  ADD KEY `FK_Calendar_Client` (`client_id`);
+
+--
 -- Indizes für die Tabelle `Client`
 --
 ALTER TABLE `Client`
@@ -126,6 +177,18 @@ ALTER TABLE `Client`
 --
 -- Constraints der exportierten Tabellen
 --
+
+--
+-- Constraints der Tabelle `Appointment`
+--
+ALTER TABLE `Appointment`
+  ADD CONSTRAINT `FK_Appointment_Client` FOREIGN KEY (`client_id`) REFERENCES `Client` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints der Tabelle `Calendar`
+--
+ALTER TABLE `Calendar`
+  ADD CONSTRAINT `FK_Calendar_Client` FOREIGN KEY (`client_id`) REFERENCES `Client` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints der Tabelle `Customer`

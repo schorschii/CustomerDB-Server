@@ -200,11 +200,70 @@ class db {
 
 	// Appointment Operations
 	public function getAppointmentsByClient($clientId) {
-		$sql = "SELECT id, title, full_day, start_time, end_time, notes, last_modified, removed FROM Appointment WHERE client_id = ?";
+		$sql = "SELECT id, calendar_id, title, notes, time_start, time_end, fullday, customer, location, last_modified, removed FROM Appointment WHERE client_id = ?";
 		if(!$this->statement = $this->mysqli->prepare($sql)) return null;
 		if(!$this->statement->bind_param('i', $clientId)) return null;
 		if(!$this->statement->execute()) return null;
 		return self::getResultObjectArray($this->statement->get_result());
+	}
+	public function insertUpdateAppointment($clientId, $id, $calendarId, $title, $notes, $timeStart, $timeEnd, $fullday, $customer, $location, $lastModified, $removed) {
+		// check if record exists
+		$sql = "SELECT id, last_modified FROM Appointment WHERE client_id = ? AND id = ?";
+		if(!$this->statement = $this->mysqli->prepare($sql)) return false;
+		$this->statement->bind_param('ii', $clientId, $id);
+		if(!$this->statement->execute()) return false;
+		$result = $this->statement->get_result();
+		if($result->num_rows > 0) {
+
+			// update if last_modified is newer than in stored record
+			$sql = "UPDATE Appointment SET calendar_id = ?, title = ?, notes = ?, time_start = ?, time_end = ?, fullday = ?, customer = ?, location = ?, last_modified = ?, removed = ? WHERE client_id = ? AND id = ? AND last_modified < ?";
+			if(!$this->statement = $this->mysqli->prepare($sql)) return false;
+			if(!$this->statement->bind_param('issssisssiiis', $calendarId, $title, $notes, $timeStart, $timeEnd, $fullday, $customer, $location, $lastModified, $removed, $clientId, $id, $lastModified)) return false;
+			return $this->statement->execute();
+
+		} else {
+
+			// create new record
+			$sql = "INSERT INTO Appointment (client_id, id, calendar_id, title, notes, time_start, time_end, fullday, customer, location, last_modified, removed) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
+			if(!$this->statement = $this->mysqli->prepare($sql)) return false;
+			if(!$this->statement->bind_param('iiissssisssi', $clientId, $id, $calendarId, $title, $notes, $timeStart, $timeEnd, $fullday, $customer, $location, $lastModified, $removed)) return false;
+			return $this->statement->execute();
+
+		}
+	}
+
+	// Calendar Operations
+	public function getCalendarsByClient($clientId) {
+		$sql = "SELECT id, title, color, notes, last_modified, removed FROM Calendar WHERE client_id = ?";
+		if(!$this->statement = $this->mysqli->prepare($sql)) return null;
+		if(!$this->statement->bind_param('i', $clientId)) return null;
+		if(!$this->statement->execute()) return null;
+		return self::getResultObjectArray($this->statement->get_result());
+	}
+	public function insertUpdateCalendar($clientId, $id, $title, $color, $notes, $lastModified, $removed) {
+		// check if record exists
+		$sql = "SELECT id, last_modified FROM Calendar WHERE client_id = ? AND id = ?";
+		if(!$this->statement = $this->mysqli->prepare($sql)) return false;
+		$this->statement->bind_param('ii', $clientId, $id);
+		if(!$this->statement->execute()) return false;
+		$result = $this->statement->get_result();
+		if($result->num_rows > 0) {
+
+			// update if last_modified is newer than in stored record
+			$sql = "UPDATE Calendar SET title = ?, color = ?, notes = ?, last_modified = ?, removed = ? WHERE client_id = ? AND id = ? AND last_modified < ?";
+			if(!$this->statement = $this->mysqli->prepare($sql)) return false;
+			if(!$this->statement->bind_param('ssssiiis', $title, $color, $notes, $lastModified, $removed, $clientId, $id, $lastModified)) return false;
+			return $this->statement->execute();
+
+		} else {
+
+			// create new record
+			$sql = "INSERT INTO Calendar (client_id, id, title, color, notes, last_modified, removed) VALUES (?,?,?,?,?,?,?)";
+			if(!$this->statement = $this->mysqli->prepare($sql)) return false;
+			if(!$this->statement->bind_param('iissssi', $clientId, $id, $title, $color, $notes, $lastModified, $removed)) return false;
+			return $this->statement->execute();
+
+		}
 	}
 
 	// Setting Operations

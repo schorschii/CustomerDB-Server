@@ -37,6 +37,8 @@ function handleApiRequestData($srcdata) {
 		case 'customerdb.read':
 			$customers = $db->getCustomersByClient($userId);
 			$vouchers = $db->getVouchersByClient($userId);
+			$calendars = $db->getCalendarsByClient($userId);
+			$appointments = $db->getAppointmentsByClient($userId);
 			foreach($customers as $customer) {
 				if($customer->image != null)
 					$customer->image = base64_encode($customer->image);
@@ -45,7 +47,9 @@ function handleApiRequestData($srcdata) {
 			}
 			$resdata['result'] = [
 				'customers' => $customers,
-				'vouchers' => $vouchers
+				'vouchers' => $vouchers,
+				'calendars' => $calendars,
+				'appointments' => $appointments,
 			];
 			break;
 
@@ -113,6 +117,51 @@ function handleApiRequestData($srcdata) {
 					$voucher['last_modified'],
 					$voucher['removed']
 				);
+			}
+			if(isset($srcdata['params']['calendars'])) {
+				foreach($srcdata['params']['calendars'] as $calendar) {
+					foreach(['id', 'title', 'color', 'notes', 'last_modified', 'removed'] as $attribute) {
+						if(!isset($calendar[$attribute])) {
+							$success = false;
+							break;
+						}
+					}
+					if(!$success) break;
+					$success = $success && $db->insertUpdateCalendar(
+						$userId,
+						$calendar['id'],
+						$calendar['title'],
+						$calendar['color'],
+						$calendar['notes'],
+						$calendar['last_modified'],
+						$calendar['removed']
+					);
+				}
+			}
+			if(isset($srcdata['params']['appointments'])) {
+				foreach($srcdata['params']['appointments'] as $appointment) {
+					foreach(['id', 'calendar_id', 'title', 'notes', 'fullday', 'customer', 'location', 'last_modified', 'removed'] as $attribute) {
+						if(!isset($appointment[$attribute])) {
+							$success = false;
+							break;
+						}
+					}
+					if(!$success) break;
+					$success = $success && $db->insertUpdateAppointment(
+						$userId,
+						$appointment['id'],
+						$appointment['calendar_id'],
+						$appointment['title'],
+						$appointment['notes'],
+						isset($appointment['time_start']) ? $appointment['time_start'] : null,
+						isset($appointment['time_end']) ? $appointment['time_end'] : null,
+						$appointment['fullday'],
+						$appointment['customer'],
+						$appointment['location'],
+						$appointment['last_modified'],
+						$appointment['removed']
+					);
+				}
 			}
 
 			$db->commitTransaction();

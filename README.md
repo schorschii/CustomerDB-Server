@@ -6,6 +6,9 @@ With this PHP web app you can set up your own server for the [Android](https://p
 - Apache 2 Webserver + PHP 7
 - MySQL/MariaDB Database Server
 
+## Upgrade
+For upgrading your server to a newer version, please read UPGRADE.md.
+
 ## Installation
 0. Install Apache 2, PHP 7 (with `php-curl`) and MySQL/MariaDB server.
 1. Download the latest release and unpack into `/srv/www/customerdb`.
