@@ -89,6 +89,7 @@ function handleApiRequestData($srcdata) {
 					$customer['custom_fields'],
 					isset($customer['image']) ? base64_decode($customer['image']) : null,
 					isset($customer['consent']) ? base64_decode($customer['consent']) : null,
+					isset($customer['files']) ? $customer['files'] : null,
 					$customer['last_modified'],
 					$customer['removed']
 				);

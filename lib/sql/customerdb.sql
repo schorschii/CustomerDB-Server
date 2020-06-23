@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Erstellungszeit: 23. Jun 2020 um 15:44
+-- Erstellungszeit: 23. Jun 2020 um 17:48
 -- Server-Version: 10.3.22-MariaDB-0+deb10u1
 -- PHP-Version: 7.3.14-1~deb10u1
 
@@ -103,6 +103,7 @@ CREATE TABLE `Customer` (
   `custom_fields` text CHARACTER SET utf8mb4 NOT NULL,
   `image` longblob DEFAULT NULL,
   `consent` longblob DEFAULT NULL,
+  `files` longblob DEFAULT NULL,
   `last_modified` datetime NOT NULL DEFAULT current_timestamp(),
   `removed` tinyint(4) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;

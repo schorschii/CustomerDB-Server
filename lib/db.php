@@ -119,13 +119,13 @@ class db {
 
 	// Customer Operations
 	public function getCustomersByClient($clientId) {
-		$sql = "SELECT id, title, first_name, last_name, phone_home, phone_mobile, phone_work, email, street, zipcode, city, country, birthday, customer_group, newsletter, notes, custom_fields, image, consent, last_modified, removed FROM Customer WHERE client_id = ?";
+		$sql = "SELECT id, title, first_name, last_name, phone_home, phone_mobile, phone_work, email, street, zipcode, city, country, birthday, customer_group, newsletter, notes, custom_fields, image, consent, files, last_modified, removed FROM Customer WHERE client_id = ?";
 		if(!$this->statement = $this->mysqli->prepare($sql)) return null;
 		if(!$this->statement->bind_param('i', $clientId)) return null;
 		if(!$this->statement->execute()) return null;
 		return self::getResultObjectArray($this->statement->get_result());
 	}
-	public function insertUpdateCustomer($clientId, $id, $title, $firstName, $lastName, $phoneHome, $phoneMobile, $phoneWork, $email, $street, $zipcode, $city, $country, $birthday, $customerGroup, $newsletter, $notes, $customFields, $image, $consentImage, $lastModified, $removed) {
+	public function insertUpdateCustomer($clientId, $id, $title, $firstName, $lastName, $phoneHome, $phoneMobile, $phoneWork, $email, $street, $zipcode, $city, $country, $birthday, $customerGroup, $newsletter, $notes, $customFields, $image, $consentImage, $files, $lastModified, $removed) {
 		// check if record exists
 		$null = null;
 		$sql = "SELECT id, last_modified FROM Customer WHERE client_id = ? AND id = ?";
@@ -136,28 +136,34 @@ class db {
 		if($result->num_rows > 0) {
 
 			// update if last_modified is newer than in stored record
-			$sql = "UPDATE Customer SET title = ?, first_name = ?, last_name = ?, phone_home = ?, phone_mobile = ?, phone_work = ?, email = ?, street = ?, zipcode = ?, city = ?, country = ?, birthday = ?, customer_group = ?, newsletter = ?, notes = ?, custom_fields = ?, image = ?, consent = ?, last_modified = ?, removed = ? WHERE client_id = ? AND id = ? AND last_modified < ?";
+			$sql = "UPDATE Customer SET title = ?, first_name = ?, last_name = ?, phone_home = ?, phone_mobile = ?, phone_work = ?, email = ?, street = ?, zipcode = ?, city = ?, country = ?, birthday = ?, customer_group = ?, newsletter = ?, notes = ?, custom_fields = ?, image = ?, consent = ?, files = ?, last_modified = ?, removed = ? WHERE client_id = ? AND id = ? AND last_modified < ?";
 			if(!$this->statement = $this->mysqli->prepare($sql)) return false;
-			if(!$this->statement->bind_param('sssssssssssssissbbsiiis', $title, $firstName, $lastName, $phoneHome, $phoneMobile, $phoneWork, $email, $street, $zipcode, $city, $country, $birthday, $customerGroup, $newsletter, $notes, $customFields, $null, $null, $lastModified, $removed, $clientId, $id, $lastModified)) return false;
+			if(!$this->statement->bind_param('sssssssssssssissbbbsiiis', $title, $firstName, $lastName, $phoneHome, $phoneMobile, $phoneWork, $email, $street, $zipcode, $city, $country, $birthday, $customerGroup, $newsletter, $notes, $customFields, $null, $null, $null, $lastModified, $removed, $clientId, $id, $lastModified)) return false;
 			if($image != null) {
 				if(!$this->statement->send_long_data(16, $image)) return false;
 			}
 			if($consentImage != null) {
 				if(!$this->statement->send_long_data(17, $consentImage)) return false;
 			}
+			if($files != null) {
+				if(!$this->statement->send_long_data(18, $files)) return false;
+			}
 			return $this->statement->execute();
 
 		} else {
 
 			// create new record
-			$sql = "INSERT INTO Customer (client_id, id, title, first_name, last_name, phone_home, phone_mobile, phone_work, email, street, zipcode, city, country, birthday, customer_group, newsletter, notes, custom_fields, image, consent, last_modified, removed) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+			$sql = "INSERT INTO Customer (client_id, id, title, first_name, last_name, phone_home, phone_mobile, phone_work, email, street, zipcode, city, country, birthday, customer_group, newsletter, notes, custom_fields, image, consent, files, last_modified, removed) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 			if(!$this->statement = $this->mysqli->prepare($sql)) return false;
-			if(!$this->statement->bind_param('iisssssssssssssissbbsi', $clientId, $id, $title, $firstName, $lastName, $phoneHome, $phoneMobile, $phoneWork, $email, $street, $zipcode, $city, $country, $birthday, $customerGroup, $newsletter, $notes, $customFields, $null, $null, $lastModified, $removed)) return false;
+			if(!$this->statement->bind_param('iisssssssssssssissbbbsi', $clientId, $id, $title, $firstName, $lastName, $phoneHome, $phoneMobile, $phoneWork, $email, $street, $zipcode, $city, $country, $birthday, $customerGroup, $newsletter, $notes, $customFields, $null, $null, $null, $lastModified, $removed)) return false;
 			if($image != null) {
 				if(!$this->statement->send_long_data(18, $image)) return false;
 			}
 			if($consentImage != null) {
 				if(!$this->statement->send_long_data(19, $consentImage)) return false;
+			}
+			if($files != null) {
+				if(!$this->statement->send_long_data(20, $files)) return false;
 			}
 			return $this->statement->execute();
 
