@@ -1,5 +1,18 @@
 <?php
 
+function remapCustomFields($customFields) {
+	// this function removes the "files" field from the custom fields string
+	// otherwise, old app versions will save and display "files" as custom field
+	$fields = explode('&', $customFields);
+	$newFields = '';
+	foreach($fields as $keyvalue) {
+		$key = explode('=', $keyvalue)[0];
+		if($key == 'files') continue;
+		$newFields .= $keyvalue . '&';
+	}
+	return $newFields;
+}
+
 function handleApiRequestData($srcdata) {
 	global $db;
 
@@ -86,7 +99,7 @@ function handleApiRequestData($srcdata) {
 					$customer['customer_group'],
 					$customer['newsletter'],
 					$customer['notes'],
-					$customer['custom_fields'],
+					remapCustomFields($customer['custom_fields']),
 					isset($customer['image']) ? base64_decode($customer['image']) : null,
 					isset($customer['consent']) ? base64_decode($customer['consent']) : null,
 					isset($customer['files']) ? $customer['files'] : null,
