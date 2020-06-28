@@ -1,6 +1,6 @@
 # Upgrade Instructions
 
-# v1.1
+## v1.1
 - upgrade database schema as defined in lib/customerdb.sql
   - add table Appointment
   - add table Calendar
