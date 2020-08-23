@@ -123,7 +123,9 @@ function handleApiRequestData($srcdata) {
 					$voucher['current_value'],
 					$voucher['voucher_no'],
 					$voucher['from_customer'],
+					isset($voucher['from_customer_id']) ? $voucher['from_customer_id'] : null,
 					$voucher['for_customer'],
+					isset($voucher['for_customer_id']) ? $voucher['for_customer_id'] : null,
 					$voucher['issued'],
 					isset($voucher['valid_until']) ? $voucher['valid_until'] : null,
 					isset($voucher['redeemed']) ? $voucher['redeemed'] : null,
@@ -171,6 +173,7 @@ function handleApiRequestData($srcdata) {
 						isset($appointment['time_end']) ? $appointment['time_end'] : null,
 						$appointment['fullday'],
 						$appointment['customer'],
+						isset($appointment['customer_id']) ? $appointment['customer_id'] : null,
 						$appointment['location'],
 						$appointment['last_modified'],
 						$appointment['removed']

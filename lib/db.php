@@ -172,13 +172,13 @@ class db {
 
 	// Voucher Operations
 	public function getVouchersByClient($clientId) {
-		$sql = "SELECT id, current_value, original_value, voucher_no, from_customer, for_customer, issued, valid_until, redeemed, notes, last_modified, removed FROM Voucher WHERE client_id = ?";
+		$sql = "SELECT id, current_value, original_value, voucher_no, from_customer, from_customer_id, for_customer, for_customer_id, issued, valid_until, redeemed, notes, last_modified, removed FROM Voucher WHERE client_id = ?";
 		if(!$this->statement = $this->mysqli->prepare($sql)) return null;
 		if(!$this->statement->bind_param('i', $clientId)) return null;
 		if(!$this->statement->execute()) return null;
 		return self::getResultObjectArray($this->statement->get_result());
 	}
-	public function insertUpdateVoucher($clientId, $id, $originalValue, $currentValue, $voucherNo, $fromCustomer, $forCustomer, $issued, $validUntil, $redeemed, $notes, $lastModified, $removed) {
+	public function insertUpdateVoucher($clientId, $id, $originalValue, $currentValue, $voucherNo, $fromCustomer, $fromCustomerId, $forCustomer, $forCustomerId, $issued, $validUntil, $redeemed, $notes, $lastModified, $removed) {
 		// check if record exists
 		$sql = "SELECT id, last_modified FROM Voucher WHERE client_id = ? AND id = ?";
 		if(!$this->statement = $this->mysqli->prepare($sql)) return false;
@@ -188,17 +188,17 @@ class db {
 		if($result->num_rows > 0) {
 
 			// update if last_modified is newer than in stored record
-			$sql = "UPDATE Voucher SET original_value = ?, current_value = ?, voucher_no = ?, from_customer = ?, for_customer = ?, issued = ?, valid_until = ?, redeemed = ?, notes = ?, last_modified = ?, removed = ? WHERE client_id = ? AND id = ? AND last_modified < ?";
+			$sql = "UPDATE Voucher SET original_value = ?, current_value = ?, voucher_no = ?, from_customer = ?, from_customer_id = ?, for_customer = ?, for_customer_id = ?, issued = ?, valid_until = ?, redeemed = ?, notes = ?, last_modified = ?, removed = ? WHERE client_id = ? AND id = ? AND last_modified < ?";
 			if(!$this->statement = $this->mysqli->prepare($sql)) return false;
-			if(!$this->statement->bind_param('ddssssssssiiis', $originalValue, $currentValue, $voucherNo, $fromCustomer, $forCustomer, $issued, $validUntil, $redeemed, $notes, $lastModified, $removed, $clientId, $id, $lastModified)) return false;
+			if(!$this->statement->bind_param('ddssisisssssiiis', $originalValue, $currentValue, $voucherNo, $fromCustomer, $fromCustomerId, $forCustomer, $forCustomerId, $issued, $validUntil, $redeemed, $notes, $lastModified, $removed, $clientId, $id, $lastModified)) return false;
 			return $this->statement->execute();
 
 		} else {
 
 			// create new record
-			$sql = "INSERT INTO Voucher (client_id, id, original_value, current_value, voucher_no, from_customer, for_customer, issued, valid_until, redeemed, notes, last_modified, removed) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
+			$sql = "INSERT INTO Voucher (client_id, id, original_value, current_value, voucher_no, from_customer, from_customer_id, for_customer, for_customer_id, issued, valid_until, redeemed, notes, last_modified, removed) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 			if(!$this->statement = $this->mysqli->prepare($sql)) return false;
-			if(!$this->statement->bind_param('iiddssssssssi', $clientId, $id, $originalValue, $currentValue, $voucherNo, $fromCustomer, $forCustomer, $issued, $validUntil, $redeemed, $notes, $lastModified, $removed)) return false;
+			if(!$this->statement->bind_param('iiddssisisssssi', $clientId, $id, $originalValue, $currentValue, $voucherNo, $fromCustomer, $fromCustomerId, $forCustomer, $forCustomerId, $issued, $validUntil, $redeemed, $notes, $lastModified, $removed)) return false;
 			return $this->statement->execute();
 
 		}
@@ -206,13 +206,13 @@ class db {
 
 	// Appointment Operations
 	public function getAppointmentsByClient($clientId) {
-		$sql = "SELECT id, calendar_id, title, notes, time_start, time_end, fullday, customer, location, last_modified, removed FROM Appointment WHERE client_id = ?";
+		$sql = "SELECT id, calendar_id, title, notes, time_start, time_end, fullday, customer, customer_id, location, last_modified, removed FROM Appointment WHERE client_id = ?";
 		if(!$this->statement = $this->mysqli->prepare($sql)) return null;
 		if(!$this->statement->bind_param('i', $clientId)) return null;
 		if(!$this->statement->execute()) return null;
 		return self::getResultObjectArray($this->statement->get_result());
 	}
-	public function insertUpdateAppointment($clientId, $id, $calendarId, $title, $notes, $timeStart, $timeEnd, $fullday, $customer, $location, $lastModified, $removed) {
+	public function insertUpdateAppointment($clientId, $id, $calendarId, $title, $notes, $timeStart, $timeEnd, $fullday, $customer, $customerId, $location, $lastModified, $removed) {
 		// check if record exists
 		$sql = "SELECT id, last_modified FROM Appointment WHERE client_id = ? AND id = ?";
 		if(!$this->statement = $this->mysqli->prepare($sql)) return false;
@@ -222,17 +222,17 @@ class db {
 		if($result->num_rows > 0) {
 
 			// update if last_modified is newer than in stored record
-			$sql = "UPDATE Appointment SET calendar_id = ?, title = ?, notes = ?, time_start = ?, time_end = ?, fullday = ?, customer = ?, location = ?, last_modified = ?, removed = ? WHERE client_id = ? AND id = ? AND last_modified < ?";
+			$sql = "UPDATE Appointment SET calendar_id = ?, title = ?, notes = ?, time_start = ?, time_end = ?, fullday = ?, customer = ?, customer_id = ?, location = ?, last_modified = ?, removed = ? WHERE client_id = ? AND id = ? AND last_modified < ?";
 			if(!$this->statement = $this->mysqli->prepare($sql)) return false;
-			if(!$this->statement->bind_param('issssisssiiis', $calendarId, $title, $notes, $timeStart, $timeEnd, $fullday, $customer, $location, $lastModified, $removed, $clientId, $id, $lastModified)) return false;
+			if(!$this->statement->bind_param('issssisissiiis', $calendarId, $title, $notes, $timeStart, $timeEnd, $fullday, $customer, $customerId, $location, $lastModified, $removed, $clientId, $id, $lastModified)) return false;
 			return $this->statement->execute();
 
 		} else {
 
 			// create new record
-			$sql = "INSERT INTO Appointment (client_id, id, calendar_id, title, notes, time_start, time_end, fullday, customer, location, last_modified, removed) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
+			$sql = "INSERT INTO Appointment (client_id, id, calendar_id, title, notes, time_start, time_end, fullday, customer, customer_id, location, last_modified, removed) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
 			if(!$this->statement = $this->mysqli->prepare($sql)) return false;
-			if(!$this->statement->bind_param('iiissssisssi', $clientId, $id, $calendarId, $title, $notes, $timeStart, $timeEnd, $fullday, $customer, $location, $lastModified, $removed)) return false;
+			if(!$this->statement->bind_param('iiissssisissi', $clientId, $id, $calendarId, $title, $notes, $timeStart, $timeEnd, $fullday, $customer, $customerId, $location, $lastModified, $removed)) return false;
 			return $this->statement->execute();
 
 		}

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Erstellungszeit: 23. Jun 2020 um 17:48
+-- Erstellungszeit: 23. Aug 2020 um 15:55
 -- Server-Version: 10.3.22-MariaDB-0+deb10u1
 -- PHP-Version: 7.3.14-1~deb10u1
 
@@ -38,6 +38,7 @@ CREATE TABLE `Appointment` (
   `time_end` datetime DEFAULT NULL,
   `fullday` tinyint(4) NOT NULL,
   `customer` text NOT NULL,
+  `customer_id` bigint(11) DEFAULT NULL,
   `location` text NOT NULL,
   `last_modified` datetime NOT NULL DEFAULT current_timestamp(),
   `removed` tinyint(4) NOT NULL DEFAULT 0
@@ -121,7 +122,9 @@ CREATE TABLE `Voucher` (
   `current_value` double NOT NULL DEFAULT 0,
   `voucher_no` text CHARACTER SET utf8mb4 NOT NULL,
   `from_customer` text CHARACTER SET utf8mb4 NOT NULL,
+  `from_customer_id` bigint(11) DEFAULT NULL,
   `for_customer` text CHARACTER SET utf8mb4 NOT NULL,
+  `for_customer_id` bigint(11) DEFAULT NULL,
   `issued` datetime NOT NULL DEFAULT current_timestamp(),
   `valid_until` datetime DEFAULT NULL,
   `redeemed` datetime DEFAULT NULL,
