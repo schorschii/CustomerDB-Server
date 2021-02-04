@@ -1,8 +1,11 @@
 # Customer Database Server
-With this PHP web app you can set up your own server for the [Android](https://play.google.com/store/apps/details?id=de.georgsieber.customerdb) and [iOS](https://apps.apple.com/us/app/customer-database/id1496659447) app "Customer Database".
+With this PHP web app you can set up your own server for the [Android](https://github.com/schorschii/customerdb-android) and [iOS](https://github.com/schorschii/customerdb-ios) app "Customer Database".
+
+[![Play Store](web/frontend/img/play-store-badge.svg)](https://play.google.com/store/apps/details?id=de.georgsieber.customerdb)
+[![App Store](web/frontend/img/app-store-badge.svg)](https://apps.apple.com/us/app/customer-database/id1496659447)
 
 ## System Requirements
-- (Debian) Linux OS
+- Linux OS (Debian recommended)
 - Apache 2 Webserver + PHP 7
 - MySQL/MariaDB Database Server
 
@@ -11,7 +14,7 @@ For upgrading your server to a newer version, please read UPGRADE.md.
 
 ## Installation
 0. Install Apache 2, PHP 7 (with `php-curl`) and MySQL/MariaDB server.
-1. Download the latest release and unpack into `/srv/www/customerdb`.
+1. Download the [latest release](https://github.com/schorschii/customerdb-server/releases) and unpack into `/srv/www/customerdb`.
 2. Set your Apache vHost web root directory to `/srv/www/customerdb/web`.
 3. Create a database on your MySQL server and import the schema from `lib/sql/customerdb.sql`.
 4. Edit/create `conf.php` from example file and enter your MySQL credentials. Please do not use the root user but create a new user which is only allowed to operate on the specific database.
