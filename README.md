@@ -32,7 +32,7 @@ For upgrading your server to a newer version, please read [UPGRADE.md](UPGRADE.m
 ## Further (Optional) Steps
 Especially if your server is available from the internet (and not only locally in your home network):
 - it is highly recommended to setup HTTPS on your web server
-- it is highly recommended to setup fail2ban on your web server. See [lib/fail2ban](lib/fail2ban/README.md) for more information
+- it is highly recommended to setup fail2ban on your web server (see [lib/fail2ban](lib/fail2ban/README.md) for more information)
 - you may want to disable the user registration in the `conf.php` file (you can also disable the API or the web frontend here)
 
 ## API Documentation
