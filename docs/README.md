@@ -2,4 +2,5 @@
 
 This folder contains documentation about the customer database project.
 
-- [JSON REST API](<JSON REST API Documentation.md>)
+- [Server Upgrade](Upgrade.md)
+- [JSON REST API Documentation](<JSON REST API Documentation.md>)

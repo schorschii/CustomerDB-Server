@@ -9,9 +9,6 @@ With this PHP web app you can set up your own server for the [Android](https://g
 - Apache 2 Webserver + PHP 7
 - MySQL/MariaDB Database Server
 
-## Upgrade
-For upgrading your server to a newer version, please read [UPGRADE.md](UPGRADE.md).
-
 ## Installation (On A Root Server)
 0. Install Apache 2, PHP 7 (with `php-curl`) and MySQL/MariaDB on a Linux server.
 1. Download the [latest release](https://github.com/schorschii/customerdb-server/releases) and unpack it into `/srv/www/customerdb`.
@@ -34,6 +31,9 @@ Especially if your server is available from the internet (and not only locally i
 - it is highly recommended to setup HTTPS on your web server
 - it is highly recommended to setup fail2ban on your web server (see [lib/fail2ban](lib/fail2ban/README.md) for more information)
 - you may want to disable the user registration in the `conf.php` file (you can also disable the API or the web frontend here)
+
+## Upgrade
+For upgrading your server to a newer version, please read [Upgrade.md](docs/Upgrade.md).
 
 ## (API) Documentation
 Please have a look at the [docs](docs/README.md) folder.
