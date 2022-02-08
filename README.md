@@ -35,8 +35,8 @@ Especially if your server is available from the internet (and not only locally i
 - it is highly recommended to setup fail2ban on your web server (see [lib/fail2ban](lib/fail2ban/README.md) for more information)
 - you may want to disable the user registration in the `conf.php` file (you can also disable the API or the web frontend here)
 
-## API Documentation
-Please have a look at the [wiki](https://github.com/schorschii/customerdb-server/wiki/API-Documentation-(JSON-REST-API)).
+## (API) Documentation
+Please have a look at the [docs](docs/README.md) folder.
 
 ## Development Status
 Currenty, these scripts only provide the API. It is planned to provide a full web frontend for creating and editing customer records in the web browser.
