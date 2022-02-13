@@ -4,6 +4,10 @@ With this PHP web app you can set up your own server for the [Android](https://g
 [![Play Store](web/frontend/img/play-store-badge.svg)](https://play.google.com/store/apps/details?id=de.georgsieber.customerdb)
 [![App Store](web/frontend/img/app-store-badge.svg)](https://apps.apple.com/us/app/customer-database/id1496659447)
 
+## Highlights
+- multi-tenant capable
+- *read-only* [CardDAV API](<docs/CardDAV API.md>) (e.g. for syncing with your router or email client)
+
 ## System Requirements
 - Linux OS (Debian recommended)
 - Apache 2 Webserver + PHP 7

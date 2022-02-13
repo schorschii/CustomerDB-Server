@@ -125,6 +125,13 @@ class db {
 		if(!$this->statement->execute()) return null;
 		return self::getResultObjectArray($this->statement->get_result());
 	}
+	public function getActiveCustomersByClient($clientId) {
+		$sql = "SELECT id, title, first_name, last_name, phone_home, phone_mobile, phone_work, email, street, zipcode, city, country, birthday, customer_group, newsletter, notes, custom_fields, image, consent, files, last_modified, removed FROM Customer WHERE client_id = ? AND removed = 0";
+		if(!$this->statement = $this->mysqli->prepare($sql)) return null;
+		if(!$this->statement->bind_param('i', $clientId)) return null;
+		if(!$this->statement->execute()) return null;
+		return self::getResultObjectArray($this->statement->get_result());
+	}
 	public function insertUpdateCustomer($clientId, $id, $title, $firstName, $lastName, $phoneHome, $phoneMobile, $phoneWork, $email, $street, $zipcode, $city, $country, $birthday, $customerGroup, $newsletter, $notes, $customFields, $image, $consentImage, $files, $lastModified, $removed) {
 		// check if record exists
 		$null = null;
