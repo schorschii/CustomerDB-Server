@@ -1,291 +1,489 @@
 <?php
 
 class db {
-	private $mysqli;
-	private $statement;
+	private $dbh;
+	private $stmt;
 
 	function __construct() {
-		mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT); // debug
-		$link = @new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
-		if($link->connect_error) {
-			die(':-O !!! failed to establish database connection: ' . $link->connect_error);
+		try {
+			$this->dbh = new PDO(
+				DB_TYPE.':host='.DB_HOST.';port='.DB_PORT.';dbname='.DB_NAME.';',
+				DB_USER, DB_PASS,
+				array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8')
+			);
+			$this->dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+		} catch(Exception $e) {
+			error_log($e->getMessage());
+			throw new Exception('Failed to establish database connection to ›'.DB_HOST.'‹. Gentle panic.');
 		}
-		$link->set_charset("utf8mb4");
-		$this->mysqli = $link;
 	}
 
 	public function getDbHandle() {
-		return $this->mysqli;
+		return $this->dbh;
 	}
 	public function getLastStatement() {
-		return $this->statement;
-	}
-
-	public function beginTransaction() {
-		return $this->mysqli->autocommit(false);
-	}
-	public function commitTransaction() {
-		return $this->mysqli->commit();
-	}
-	public function rollbackTransaction() {
-		return $this->mysqli->rollback();
-	}
-
-	public static function getResultObjectArray($result) {
-		$resultArray = [];
-		while($row = $result->fetch_object()) {
-			$resultArray[] = $row;
-		}
-		return $resultArray;
+		return $this->stmt;
 	}
 
 	public function existsSchema() {
-		$sql = "SHOW TABLES LIKE 'Client'";
-		if(!$this->statement = $this->mysqli->prepare($sql)) return null;
-		if(!$this->statement->execute()) return null;
-		$result = $this->statement->get_result();
-		return ($result->num_rows == 1);
+		$this->stmt = $this->dbh->prepare(
+			'SHOW TABLES LIKE "Client"'
+		);
+		$this->stmt->execute();
+		foreach($this->stmt->fetchAll() as $row) {
+			return true;
+		}
 	}
 
 	// Client Operations
 	public function getClient($id) {
-		$sql = "SELECT * FROM Client WHERE id = ?";
-		if(!$this->statement = $this->mysqli->prepare($sql)) return null;
-		if(!$this->statement->bind_param('i', $id)) return null;
-		if(!$this->statement->execute()) return null;
-		$result = $this->statement->get_result();
-		if($result->num_rows == 0) return null;
-		while($row = $result->fetch_object()) {
+		$this->stmt = $this->dbh->prepare(
+			'SELECT * FROM Client WHERE id = :id'
+		);
+		$this->stmt->execute([':id' => $id]);
+		foreach($this->stmt->fetchAll(PDO::FETCH_CLASS, 'Client') as $row) {
 			return $row;
 		}
 	}
 	public function getClients() {
-		$sql = "SELECT * FROM Client";
-		if(!$this->statement = $this->mysqli->prepare($sql)) return null;
-		if(!$this->statement->execute()) return null;
-		return self::getResultObjectArray($this->statement->get_result());
+		$this->stmt = $this->dbh->prepare(
+			'SELECT * FROM Client'
+		);
+		$this->stmt->execute();
+		return $this->stmt->fetchAll(PDO::FETCH_CLASS, 'Client');
 	}
 	public function getClientByEmail($email) {
-		$sql = "SELECT * FROM Client WHERE email = ?";
-		if(!$this->statement = $this->mysqli->prepare($sql)) return null;
-		if(!$this->statement->bind_param('s', $email)) return null;
-		if(!$this->statement->execute()) return null;
-		return self::getResultObjectArray($this->statement->get_result());
+		$this->stmt = $this->dbh->prepare(
+			'SELECT * FROM Client WHERE email = :email'
+		);
+		$this->stmt->execute([':email' => $email]);
+		return $this->stmt->fetchAll(PDO::FETCH_CLASS, 'Client');
 	}
 	public function insertClient($email, $password, $activation_token) {
 		if(count($this->getClientByEmail($email)) > 0) return -1;
-		$sql = "INSERT INTO Client (email, password, pending_activation_token) VALUES (?,?,?)";
-		if(!$this->statement = $this->mysqli->prepare($sql)) return null;
-		if(!$this->statement->bind_param('sss', $email, $password, $activation_token)) return null;
-		if(!$this->statement->execute()) return null;
-		return $this->statement->insert_id;
+		$this->stmt = $this->dbh->prepare(
+			'INSERT INTO Client (email, password, pending_activation_token)
+			VALUES (:email, :password, :activation_token)'
+		);
+		$this->stmt->execute([
+			':email' => $email,
+			':password' => $password,
+			':activation_token' => $activation_token,
+		]);
+		return $this->dbh->lastInsertId();
 	}
 	public function setClientPassword($id, $password) {
-		$sql = "UPDATE Client SET password = ? WHERE id = ?";
-		if(!$this->statement = $this->mysqli->prepare($sql)) return null;
-		if(!$this->statement->bind_param('si', $password, $id)) return null;
-		return $this->statement->execute();
+		$this->stmt = $this->dbh->prepare(
+			'UPDATE Client SET password = :password WHERE id = :id'
+		);
+		return $this->stmt->execute([
+			':password' => $password,
+			':id' => $id,
+		]);
 	}
 	public function setClientActivity($id) {
-		$sql = "UPDATE Client SET last_login = CURRENT_TIMESTAMP WHERE id = ?";
-		if(!$this->statement = $this->mysqli->prepare($sql)) return null;
-		if(!$this->statement->bind_param('i', $id)) return null;
-		return $this->statement->execute();
+		$this->stmt = $this->dbh->prepare(
+			'UPDATE Client SET last_login = CURRENT_TIMESTAMP WHERE id = :id'
+		);
+		return $this->stmt->execute([
+			':id' => $id,
+		]);
 	}
 	public function setClientToken($id, $token) {
-		$sql = "UPDATE Client SET pending_activation_token = ? WHERE id = ?";
-		if(!$this->statement = $this->mysqli->prepare($sql)) return null;
-		if(!$this->statement->bind_param('si', $token, $id)) return null;
-		return $this->statement->execute();
+		$this->stmt = $this->dbh->prepare(
+			'UPDATE Client SET pending_activation_token = :token WHERE id = :id'
+		);
+		return $this->stmt->execute([
+			':id' => $id,
+			':token' => $token,
+		]);
 	}
 	public function setClientResetToken($id, $token) {
-		$sql = "UPDATE Client SET pending_reset_token = ? WHERE id = ?";
-		if(!$this->statement = $this->mysqli->prepare($sql)) return null;
-		if(!$this->statement->bind_param('si', $token, $id)) return null;
-		return $this->statement->execute();
+		$this->stmt = $this->dbh->prepare(
+			'UPDATE Client SET pending_reset_token = :token WHERE id = :id'
+		);
+		return $this->stmt->execute([
+			':id' => $id,
+			':token' => $token,
+		]);
 	}
 	public function setClientDeletionToken($id, $token) {
-		$sql = "UPDATE Client SET pending_deletion_token = ? WHERE id = ?";
-		if(!$this->statement = $this->mysqli->prepare($sql)) return null;
-		if(!$this->statement->bind_param('si', $token, $id)) return null;
-		return $this->statement->execute();
+		$this->stmt = $this->dbh->prepare(
+			'UPDATE Client SET pending_deletion_token = :token WHERE id = :id'
+		);
+		return $this->stmt->execute([
+			':id' => $id,
+			':token' => $token,
+		]);
 	}
 	public function deleteClient($id) {
-		$sql = "DELETE FROM Client WHERE id = ?";
-		if(!$this->statement = $this->mysqli->prepare($sql)) return null;
-		if(!$this->statement->bind_param('i', $id)) return null;
-		return $this->statement->execute();
+		$this->stmt = $this->dbh->prepare(
+			'DELETE FROM Client WHERE id = :id'
+		);
+		return $this->stmt->execute([':id' => $id]);
 	}
 
 	// Customer Operations
 	public function getCustomersByClient($clientId) {
-		$sql = "SELECT id, title, first_name, last_name, phone_home, phone_mobile, phone_work, email, street, zipcode, city, country, birthday, customer_group, newsletter, notes, custom_fields, image, consent, files, last_modified, removed FROM Customer WHERE client_id = ?";
-		if(!$this->statement = $this->mysqli->prepare($sql)) return null;
-		if(!$this->statement->bind_param('i', $clientId)) return null;
-		if(!$this->statement->execute()) return null;
-		return self::getResultObjectArray($this->statement->get_result());
+		$this->stmt = $this->dbh->prepare(
+			'SELECT id, title, first_name, last_name, phone_home, phone_mobile, phone_work, email, street, zipcode, city, country, birthday, customer_group, newsletter, notes, custom_fields, image, consent, files, last_modified, removed
+			FROM Customer WHERE client_id = :client_id'
+		);
+		$this->stmt->execute([':client_id' => $clientId]);
+		return $this->stmt->fetchAll(PDO::FETCH_CLASS, 'Customer');
 	}
 	public function getActiveCustomersByClient($clientId) {
-		$sql = "SELECT id, title, first_name, last_name, phone_home, phone_mobile, phone_work, email, street, zipcode, city, country, birthday, customer_group, newsletter, notes, custom_fields, image, consent, files, last_modified, removed FROM Customer WHERE client_id = ? AND removed = 0";
-		if(!$this->statement = $this->mysqli->prepare($sql)) return null;
-		if(!$this->statement->bind_param('i', $clientId)) return null;
-		if(!$this->statement->execute()) return null;
-		return self::getResultObjectArray($this->statement->get_result());
+		$this->stmt = $this->dbh->prepare(
+			'SELECT id, title, first_name, last_name, phone_home, phone_mobile, phone_work, email, street, zipcode, city, country, birthday, customer_group, newsletter, notes, custom_fields, image, consent, files, last_modified, removed
+			FROM Customer WHERE removed = 0 AND client_id = :client_id'
+		);
+		$this->stmt->execute([':client_id' => $clientId]);
+		return $this->stmt->fetchAll(PDO::FETCH_CLASS, 'Customer');
+	}
+	public function getActiveCustomerByClient($clientId, $id) {
+		$this->stmt = $this->dbh->prepare(
+			'SELECT id, title, first_name, last_name, phone_home, phone_mobile, phone_work, email, street, zipcode, city, country, birthday, customer_group, newsletter, notes, custom_fields, image, consent, files, last_modified, removed
+			FROM Customer WHERE removed = 0 AND client_id = :client_id AND id = :id'
+		);
+		$this->stmt->execute([':client_id' => $clientId, ':id' => $id]);
+		foreach($this->stmt->fetchAll(PDO::FETCH_CLASS, 'Customer') as $customer) {
+			return $customer;
+		}
+	}
+	public function markDeletedCustomerByClient($clientId, $id) {
+		$this->stmt = $this->dbh->prepare(
+			'UPDATE Customer
+			SET title = "", first_name = "", last_name = "", phone_home = "", phone_mobile = "", phone_work = "", email = "", street = "", zipcode = "", city = "", country = "", birthday = NULL, customer_group = "", newsletter = 0, notes = "", custom_fields = "", image = NULL, consent = NULL, files = NULL, last_modified = CURRENT_TIMESTAMP, removed = 1
+			WHERE client_id = :client_id AND id = :id'
+		);
+		return $this->stmt->execute([':client_id' => $clientId, ':id' => $id]);
 	}
 	public function insertUpdateCustomer($clientId, $id, $title, $firstName, $lastName, $phoneHome, $phoneMobile, $phoneWork, $email, $street, $zipcode, $city, $country, $birthday, $customerGroup, $newsletter, $notes, $customFields, $image, $consentImage, $files, $lastModified, $removed) {
+
 		// check if record exists
-		$null = null;
-		$sql = "SELECT id, last_modified FROM Customer WHERE client_id = ? AND id = ?";
-		if(!$this->statement = $this->mysqli->prepare($sql)) return false;
-		$this->statement->bind_param('ii', $clientId, $id);
-		if(!$this->statement->execute()) return false;
-		$result = $this->statement->get_result();
-		if($result->num_rows > 0) {
+		$this->stmt = $this->dbh->prepare(
+			'SELECT id, last_modified FROM Customer WHERE client_id = :client_id AND id = :id'
+		);
+		$checkResult = $this->stmt->execute([':client_id' => $clientId, ':id' => $id]);
+		if(!$checkResult) throw new Exception('Could not check if customer exists');
+
+		if($this->stmt->rowCount() > 0) {
 
 			// update if last_modified is newer than in stored record
-			$sql = "UPDATE Customer SET title = ?, first_name = ?, last_name = ?, phone_home = ?, phone_mobile = ?, phone_work = ?, email = ?, street = ?, zipcode = ?, city = ?, country = ?, birthday = ?, customer_group = ?, newsletter = ?, notes = ?, custom_fields = ?, image = ?, consent = ?, files = ?, last_modified = ?, removed = ? WHERE client_id = ? AND id = ? AND last_modified < ?";
-			if(!$this->statement = $this->mysqli->prepare($sql)) return false;
-			if(!$this->statement->bind_param('sssssssssssssissbbbsiiis', $title, $firstName, $lastName, $phoneHome, $phoneMobile, $phoneWork, $email, $street, $zipcode, $city, $country, $birthday, $customerGroup, $newsletter, $notes, $customFields, $null, $null, $null, $lastModified, $removed, $clientId, $id, $lastModified)) return false;
-			if($image != null) {
-				if(!$this->statement->send_long_data(16, $image)) return false;
-			}
-			if($consentImage != null) {
-				if(!$this->statement->send_long_data(17, $consentImage)) return false;
-			}
-			if($files != null) {
-				if(!$this->statement->send_long_data(18, $files)) return false;
-			}
-			return $this->statement->execute();
+			$this->stmt = $this->dbh->prepare(
+				'UPDATE Customer SET title = :title, first_name = :first_name, last_name = :last_name, phone_home = :phone_home, phone_mobile = :phone_mobile, phone_work = :phone_work, email = :email, street = :street, zipcode = :zipcode, city = :city, country = :country, birthday = :birthday, customer_group = :customer_group, newsletter = :newsletter, notes = :notes, custom_fields = :custom_fields, image = :image, consent = :consent, files = :files, last_modified = :last_modified, removed = :removed
+				WHERE client_id = :client_id AND id = :id AND last_modified < :last_modified'
+			);
+			return $this->stmt->execute([
+				':client_id' => $clientId,
+				':id' => $id,
+				':title' => $title,
+				':first_name' => $firstName,
+				':last_name' => $lastName,
+				':phone_home' => $phoneHome,
+				':phone_mobile' => $phoneMobile,
+				':phone_work' => $phoneWork,
+				':email' => $email,
+				':street' => $street,
+				':zipcode' => $zipcode,
+				':city' => $city,
+				':country' => $country,
+				':birthday' => $birthday,
+				':customer_group' => $customerGroup,
+				':newsletter' => $newsletter,
+				':notes' => $notes,
+				':custom_fields' => $customFields,
+				':image' => $image,
+				':consent' => $consentImage,
+				':files' => $files,
+				':last_modified' => $lastModified,
+				':removed' => $removed,
+			]);
 
 		} else {
 
 			// create new record
-			$sql = "INSERT INTO Customer (client_id, id, title, first_name, last_name, phone_home, phone_mobile, phone_work, email, street, zipcode, city, country, birthday, customer_group, newsletter, notes, custom_fields, image, consent, files, last_modified, removed) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-			if(!$this->statement = $this->mysqli->prepare($sql)) return false;
-			if(!$this->statement->bind_param('iisssssssssssssissbbbsi', $clientId, $id, $title, $firstName, $lastName, $phoneHome, $phoneMobile, $phoneWork, $email, $street, $zipcode, $city, $country, $birthday, $customerGroup, $newsletter, $notes, $customFields, $null, $null, $null, $lastModified, $removed)) return false;
-			if($image != null) {
-				if(!$this->statement->send_long_data(18, $image)) return false;
-			}
-			if($consentImage != null) {
-				if(!$this->statement->send_long_data(19, $consentImage)) return false;
-			}
-			if($files != null) {
-				if(!$this->statement->send_long_data(20, $files)) return false;
-			}
-			return $this->statement->execute();
+			$this->stmt = $this->dbh->prepare(
+				'INSERT INTO Customer (client_id, id, title, first_name, last_name, phone_home, phone_mobile, phone_work, email, street, zipcode, city, country, birthday, customer_group, newsletter, notes, custom_fields, image, consent, files, last_modified, removed)
+				VALUES (:client_id, :id, :title, :first_name, :last_name, :phone_home, :phone_mobile, :phone_work, :email, :street, :zipcode, :city, :country, :birthday, :customer_group, :newsletter, :notes, :custom_fields, :image, :consent, :files, :last_modified, :removed)'
+			);
+			return $this->stmt->execute([
+				':client_id' => $clientId,
+				':id' => $id,
+				':title' => $title,
+				':first_name' => $firstName,
+				':last_name' => $lastName,
+				':phone_home' => $phoneHome,
+				':phone_mobile' => $phoneMobile,
+				':phone_work' => $phoneWork,
+				':email' => $email,
+				':street' => $street,
+				':zipcode' => $zipcode,
+				':city' => $city,
+				':country' => $country,
+				':birthday' => $birthday,
+				':customer_group' => $customerGroup,
+				':newsletter' => $newsletter,
+				':notes' => $notes,
+				':custom_fields' => $customFields,
+				':image' => $image,
+				':consent' => $consentImage,
+				':files' => $files,
+				':last_modified' => $lastModified,
+				':removed' => $removed,
+			]);
 
 		}
 	}
 
 	// Voucher Operations
 	public function getVouchersByClient($clientId) {
-		$sql = "SELECT id, current_value, original_value, voucher_no, from_customer, from_customer_id, for_customer, for_customer_id, issued, valid_until, redeemed, notes, last_modified, removed FROM Voucher WHERE client_id = ?";
-		if(!$this->statement = $this->mysqli->prepare($sql)) return null;
-		if(!$this->statement->bind_param('i', $clientId)) return null;
-		if(!$this->statement->execute()) return null;
-		return self::getResultObjectArray($this->statement->get_result());
+		$this->stmt = $this->dbh->prepare(
+			'SELECT * FROM Voucher WHERE client_id = :client_id'
+		);
+		$this->stmt->execute([':client_id' => $clientId]);
+		return $this->stmt->fetchAll(PDO::FETCH_CLASS, 'Voucher', [$this->getCurrencyByClient($clientId)]);
+	}
+	public function getActiveVouchersByClient($clientId) {
+		$this->stmt = $this->dbh->prepare(
+			'SELECT * FROM Voucher WHERE removed = 0 AND client_id = :client_id'
+		);
+		$this->stmt->execute([':client_id' => $clientId]);
+		return $this->stmt->fetchAll(PDO::FETCH_CLASS, 'Voucher', [$this->getCurrencyByClient($clientId)]);
+	}
+	public function getActiveVoucherByClient($clientId, $id) {
+		$this->stmt = $this->dbh->prepare(
+			'SELECT * FROM Voucher WHERE removed = 0 AND client_id = :client_id AND id = :id'
+		);
+		$this->stmt->execute([':client_id' => $clientId, ':id' => $id]);
+		foreach($this->stmt->fetchAll(PDO::FETCH_CLASS, 'Voucher', [$this->getCurrencyByClient($clientId)]) as $voucher) {
+			return $voucher;
+		}
+	}
+	public function markDeletedVoucherByClient($clientId, $id) {
+		$this->stmt = $this->dbh->prepare(
+			'UPDATE Voucher
+			SET original_value = 0, current_value = 0, voucher_no = "", from_customer = "", from_customer_id = NULL, for_customer = "", for_customer_id = NULL, valid_until = NULL, redeemed = NULL, notes = "", last_modified = CURRENT_TIMESTAMP, removed = 1
+			WHERE client_id = :client_id AND id = :id'
+		);
+		return $this->stmt->execute([':client_id' => $clientId, ':id' => $id]);
 	}
 	public function insertUpdateVoucher($clientId, $id, $originalValue, $currentValue, $voucherNo, $fromCustomer, $fromCustomerId, $forCustomer, $forCustomerId, $issued, $validUntil, $redeemed, $notes, $lastModified, $removed) {
+
 		// check if record exists
-		$sql = "SELECT id, last_modified FROM Voucher WHERE client_id = ? AND id = ?";
-		if(!$this->statement = $this->mysqli->prepare($sql)) return false;
-		$this->statement->bind_param('ii', $clientId, $id);
-		if(!$this->statement->execute()) return false;
-		$result = $this->statement->get_result();
-		if($result->num_rows > 0) {
+		$this->stmt = $this->dbh->prepare(
+			'SELECT id, last_modified FROM Voucher WHERE client_id = :client_id AND id = :id'
+		);
+		$checkResult = $this->stmt->execute([':client_id' => $clientId, ':id' => $id]);
+		if(!$checkResult) throw new Exception('Could not check if voucher exists');
+
+		if($this->stmt->rowCount() > 0) {
 
 			// update if last_modified is newer than in stored record
-			$sql = "UPDATE Voucher SET original_value = ?, current_value = ?, voucher_no = ?, from_customer = ?, from_customer_id = ?, for_customer = ?, for_customer_id = ?, issued = ?, valid_until = ?, redeemed = ?, notes = ?, last_modified = ?, removed = ? WHERE client_id = ? AND id = ? AND last_modified < ?";
-			if(!$this->statement = $this->mysqli->prepare($sql)) return false;
-			if(!$this->statement->bind_param('ddssisisssssiiis', $originalValue, $currentValue, $voucherNo, $fromCustomer, $fromCustomerId, $forCustomer, $forCustomerId, $issued, $validUntil, $redeemed, $notes, $lastModified, $removed, $clientId, $id, $lastModified)) return false;
-			return $this->statement->execute();
+			$this->stmt = $this->dbh->prepare(
+				'UPDATE Voucher SET original_value = :original_value, current_value = :current_value, voucher_no = :voucher_no, from_customer = :from_customer, from_customer_id = :from_customer_id, for_customer = :for_customer, for_customer_id = :for_customer_id, issued = :issued, valid_until = :valid_until, redeemed = :redeemed, notes = :notes, last_modified = :last_modified, removed = :removed
+				WHERE client_id = :client_id AND id = :id AND last_modified < :last_modified'
+			);
+			return $this->stmt->execute([
+				':client_id' => $clientId,
+				':id' => $id,
+				':original_value' => $originalValue,
+				':current_value' => $currentValue,
+				':voucher_no' => $voucherNo,
+				':from_customer' => $fromCustomer,
+				':from_customer_id' => $fromCustomerId,
+				':for_customer' => $forCustomer,
+				':for_customer_id' => $forCustomerId,
+				':issued' => $issued,
+				':valid_until' => $validUntil,
+				':redeemed' => $redeemed,
+				':notes' => $notes,
+				':last_modified' => $lastModified,
+				':removed' => $removed,
+			]);
 
 		} else {
 
 			// create new record
-			$sql = "INSERT INTO Voucher (client_id, id, original_value, current_value, voucher_no, from_customer, from_customer_id, for_customer, for_customer_id, issued, valid_until, redeemed, notes, last_modified, removed) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-			if(!$this->statement = $this->mysqli->prepare($sql)) return false;
-			if(!$this->statement->bind_param('iiddssisisssssi', $clientId, $id, $originalValue, $currentValue, $voucherNo, $fromCustomer, $fromCustomerId, $forCustomer, $forCustomerId, $issued, $validUntil, $redeemed, $notes, $lastModified, $removed)) return false;
-			return $this->statement->execute();
+			$this->stmt = $this->dbh->prepare(
+				'INSERT INTO Voucher (client_id, id, original_value, current_value, voucher_no, from_customer, from_customer_id, for_customer, for_customer_id, issued, valid_until, redeemed, notes, last_modified, removed)
+				VALUES (:client_id, :id, :original_value, :current_value, :voucher_no, :from_customer, :from_customer_id, :for_customer, :for_customer_id, :issued, :valid_until, :redeemed, :notes, :last_modified, :removed)'
+			);
+			return $this->stmt->execute([
+				':client_id' => $clientId,
+				':id' => $id,
+				':original_value' => $originalValue,
+				':current_value' => $currentValue,
+				':voucher_no' => $voucherNo,
+				':from_customer' => $fromCustomer,
+				':from_customer_id' => $fromCustomerId,
+				':for_customer' => $forCustomer,
+				':for_customer_id' => $forCustomerId,
+				':issued' => $issued,
+				':valid_until' => $validUntil,
+				':redeemed' => $redeemed,
+				':notes' => $notes,
+				':last_modified' => $lastModified,
+				':removed' => $removed,
+			]);
 
 		}
 	}
 
 	// Appointment Operations
 	public function getAppointmentsByClient($clientId) {
-		$sql = "SELECT id, calendar_id, title, notes, time_start, time_end, fullday, customer, customer_id, location, last_modified, removed FROM Appointment WHERE client_id = ?";
-		if(!$this->statement = $this->mysqli->prepare($sql)) return null;
-		if(!$this->statement->bind_param('i', $clientId)) return null;
-		if(!$this->statement->execute()) return null;
-		return self::getResultObjectArray($this->statement->get_result());
+		$this->stmt = $this->dbh->prepare(
+			'SELECT * FROM Appointment WHERE client_id = :id'
+		);
+		$this->stmt->execute([':id' => $clientId]);
+		return $this->stmt->fetchAll();
+	}
+	public function getActiveAppointmentsByClient($clientId) {
+		$this->stmt = $this->dbh->prepare(
+			'SELECT * FROM Appointment WHERE removed = 0 AND client_id = :client_id'
+		);
+		$this->stmt->execute([':client_id' => $clientId]);
+		return $this->stmt->fetchAll();
 	}
 	public function insertUpdateAppointment($clientId, $id, $calendarId, $title, $notes, $timeStart, $timeEnd, $fullday, $customer, $customerId, $location, $lastModified, $removed) {
+
 		// check if record exists
-		$sql = "SELECT id, last_modified FROM Appointment WHERE client_id = ? AND id = ?";
-		if(!$this->statement = $this->mysqli->prepare($sql)) return false;
-		$this->statement->bind_param('ii', $clientId, $id);
-		if(!$this->statement->execute()) return false;
-		$result = $this->statement->get_result();
-		if($result->num_rows > 0) {
+		$this->stmt = $this->dbh->prepare(
+			'SELECT id, last_modified FROM Appointment WHERE client_id = :client_id AND id = :id'
+		);
+		$checkResult = $this->stmt->execute([':client_id' => $clientId, ':id' => $id]);
+		if(!$checkResult) throw new Exception('Could not check if appointment exists');
+
+		if($this->stmt->rowCount() > 0) {
 
 			// update if last_modified is newer than in stored record
-			$sql = "UPDATE Appointment SET calendar_id = ?, title = ?, notes = ?, time_start = ?, time_end = ?, fullday = ?, customer = ?, customer_id = ?, location = ?, last_modified = ?, removed = ? WHERE client_id = ? AND id = ? AND last_modified < ?";
-			if(!$this->statement = $this->mysqli->prepare($sql)) return false;
-			if(!$this->statement->bind_param('issssisissiiis', $calendarId, $title, $notes, $timeStart, $timeEnd, $fullday, $customer, $customerId, $location, $lastModified, $removed, $clientId, $id, $lastModified)) return false;
-			return $this->statement->execute();
+			$this->stmt = $this->dbh->prepare(
+				'UPDATE Appointment SET calendar_id = :calendar_id, title = :title, notes = :notes, time_start = :time_start, time_end = :time_end, fullday = :fullday, customer = :customer, customer_id = :customer_id, location = :location, last_modified = :last_modified, removed = :removed
+				WHERE client_id = :client_id AND id = :id AND last_modified < :last_modified'
+			);
+			return $this->stmt->execute([
+				':client_id' => $clientId,
+				':id' => $id,
+				':calendar_id' => $calendarId,
+				':title' => $title,
+				':notes' => $notes,
+				':time_start' => $timeStart,
+				':time_end' => $timeEnd,
+				':fullday' => $fullday,
+				':customer' => $customer,
+				':customer_id' => $customerId,
+				':location' => $location,
+				':last_modified' => $lastModified,
+				':removed' => $removed,
+			]);
 
 		} else {
 
 			// create new record
-			$sql = "INSERT INTO Appointment (client_id, id, calendar_id, title, notes, time_start, time_end, fullday, customer, customer_id, location, last_modified, removed) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
-			if(!$this->statement = $this->mysqli->prepare($sql)) return false;
-			if(!$this->statement->bind_param('iiissssisissi', $clientId, $id, $calendarId, $title, $notes, $timeStart, $timeEnd, $fullday, $customer, $customerId, $location, $lastModified, $removed)) return false;
-			return $this->statement->execute();
+			$this->stmt = $this->dbh->prepare(
+				'INSERT INTO Appointment (client_id, id, calendar_id, title, notes, time_start, time_end, fullday, customer, customer_id, location, last_modified, removed)
+				VALUES (:client_id, :id, :calendar_id, :title, :notes, :time_start, :time_end, :fullday, :customer, :customer_id, :location, :last_modified, :removed)'
+			);
+			return $this->stmt->execute([
+				':client_id' => $clientId,
+				':id' => $id,
+				':calendar_id' => $calendarId,
+				':title' => $title,
+				':notes' => $notes,
+				':time_start' => $timeStart,
+				':time_end' => $timeEnd,
+				':fullday' => $fullday,
+				':customer' => $customer,
+				':customer_id' => $customerId,
+				':location' => $location,
+				':last_modified' => $lastModified,
+				':removed' => $removed,
+			]);
 
 		}
 	}
 
 	// Calendar Operations
 	public function getCalendarsByClient($clientId) {
-		$sql = "SELECT id, title, color, notes, last_modified, removed FROM Calendar WHERE client_id = ?";
-		if(!$this->statement = $this->mysqli->prepare($sql)) return null;
-		if(!$this->statement->bind_param('i', $clientId)) return null;
-		if(!$this->statement->execute()) return null;
-		return self::getResultObjectArray($this->statement->get_result());
+		$this->stmt = $this->dbh->prepare(
+			'SELECT * FROM Calendar WHERE client_id = :id'
+		);
+		$this->stmt->execute([':id' => $clientId]);
+		return $this->stmt->fetchAll();
+	}
+	public function getActiveCalendarsByClient($clientId) {
+		$this->stmt = $this->dbh->prepare(
+			'SELECT * FROM Calendar WHERE removed = 0 AND client_id = :client_id'
+		);
+		$this->stmt->execute([':client_id' => $clientId]);
+		return $this->stmt->fetchAll();
 	}
 	public function insertUpdateCalendar($clientId, $id, $title, $color, $notes, $lastModified, $removed) {
+
 		// check if record exists
-		$sql = "SELECT id, last_modified FROM Calendar WHERE client_id = ? AND id = ?";
-		if(!$this->statement = $this->mysqli->prepare($sql)) return false;
-		$this->statement->bind_param('ii', $clientId, $id);
-		if(!$this->statement->execute()) return false;
-		$result = $this->statement->get_result();
-		if($result->num_rows > 0) {
+		$this->stmt = $this->dbh->prepare(
+			'SELECT id, last_modified FROM Calendar WHERE client_id = :client_id AND id = :id'
+		);
+		$checkResult = $this->stmt->execute([':client_id' => $clientId, ':id' => $id]);
+		if(!$checkResult) throw new Exception('Could not check if appointment exists');
+
+		if($this->stmt->rowCount() > 0) {
 
 			// update if last_modified is newer than in stored record
-			$sql = "UPDATE Calendar SET title = ?, color = ?, notes = ?, last_modified = ?, removed = ? WHERE client_id = ? AND id = ? AND last_modified < ?";
-			if(!$this->statement = $this->mysqli->prepare($sql)) return false;
-			if(!$this->statement->bind_param('ssssiiis', $title, $color, $notes, $lastModified, $removed, $clientId, $id, $lastModified)) return false;
-			return $this->statement->execute();
+			$this->stmt = $this->dbh->prepare(
+				'UPDATE Calendar SET title = :title, color = :color, notes = :notes, last_modified = :last_modified, removed = :removed
+				WHERE client_id = :client_id AND id = :id AND last_modified < :last_modified'
+			);
+			return $this->stmt->execute([
+				':client_id' => $clientId,
+				':id' => $id,
+				':title' => $title,
+				':color' => $color,
+				':notes' => $notes,
+				':last_modified' => $lastModified,
+				':removed' => $removed,
+			]);
 
 		} else {
 
 			// create new record
-			$sql = "INSERT INTO Calendar (client_id, id, title, color, notes, last_modified, removed) VALUES (?,?,?,?,?,?,?)";
-			if(!$this->statement = $this->mysqli->prepare($sql)) return false;
-			if(!$this->statement->bind_param('iissssi', $clientId, $id, $title, $color, $notes, $lastModified, $removed)) return false;
-			return $this->statement->execute();
+			$this->stmt = $this->dbh->prepare(
+				'INSERT INTO Calendar (client_id, id, title, color, notes, last_modified, removed)
+				VALUES (:client_id, :id, :title, :color, :notes, :last_modified, :removed)'
+			);
+			return $this->stmt->execute([
+				':client_id' => $clientId,
+				':id' => $id,
+				':title' => $title,
+				':color' => $color,
+				':notes' => $notes,
+				':last_modified' => $lastModified,
+				':removed' => $removed,
+			]);
 
 		}
 	}
 
 	// Setting Operations
 	public function getSettingsByClient($clientId) {
-		$sql = "SELECT id, title, value, last_modified FROM Setting WHERE client_id = ?";
-		if(!$this->statement = $this->mysqli->prepare($sql)) return null;
-		if(!$this->statement->bind_param('i', $clientId)) return null;
-		if(!$this->statement->execute()) return null;
-		return self::getResultObjectArray($this->statement->get_result());
+		$this->stmt = $this->dbh->prepare(
+			'SELECT id, setting, value, last_modified FROM Setting WHERE client_id = :client_id'
+		);
+		$this->stmt->execute([':client_id' => $clientId]);
+		return $this->stmt->fetchAll();
+	}
+	public function getSettingByClient($clientId, $setting) {
+		$this->stmt = $this->dbh->prepare(
+			'SELECT id, setting, value, last_modified FROM Setting WHERE client_id = :client_id AND setting = :setting'
+		);
+		$this->stmt->execute([':client_id' => $clientId, ':setting' => $setting]);
+		foreach($this->stmt->fetchAll() as $s) {
+			return $s['value'];
+		}
+		return null;
+	}
+	public function getCurrencyByClient($clientId) {
+		return $this->getSettingByClient($clientId, 'currency') ?? DEFAULT_CURRENCY;
 	}
 
 }

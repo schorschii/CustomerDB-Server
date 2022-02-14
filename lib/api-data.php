@@ -68,7 +68,7 @@ function handleApiRequestData($srcdata) {
 
 		case 'customerdb.put':
 			$success = true;
-			$db->beginTransaction();
+			$db->getDbHandle()->beginTransaction();
 
 			// todo check if all attr delivered before accessing it in array
 			foreach($srcdata['params']['customers'] as $customer) {
@@ -181,7 +181,7 @@ function handleApiRequestData($srcdata) {
 				}
 			}
 
-			$db->commitTransaction();
+			$db->getDbHandle()->commit();
 			$resdata['result'] = $success;
 			break;
 
