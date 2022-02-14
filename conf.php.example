@@ -1,6 +1,7 @@
 <?php
 
 // General Config
+const DEFAULT_CURRENCY      = "€";
 const FRONTEND_ENABLED      = false;
 const API_ENABLED           = true;
 const REGISTRATION_ENABLED  = true;
@@ -9,6 +10,8 @@ const MAIL_SENDER_ADDRESS   = "noreply@customerdb.example.com";
 const WEB_BASE_URL          = "https://customerdb.example.com";
 
 // MySQL Credentials
+const DB_TYPE = "mysql";
+const DB_PORT = "3306";
 const DB_HOST = "localhost";
 const DB_USER = "customerdb";
 const DB_PASS = "PASSWORD";
