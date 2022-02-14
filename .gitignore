@@ -1,2 +1,10 @@
+lib/google-api-php-client/
 conf-googleapi.json
+
+lib/.debug.php
+web/.debug.php
+
 conf.php
+
+lib/appstore.php
+lib/playstore.php

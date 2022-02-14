@@ -43,6 +43,31 @@ function handleApiRequestData($srcdata) {
 		return $resdata;
 	}
 
+	// check cloud access license payment
+	$paymentOk = false;
+	if($user->check_payment == 0) {
+		// special customers that can use the sync for free
+		$paymentOk = true;
+	}
+	elseif(function_exists('checkAppStore') && !empty($srcdata['params']['appstore_receipt'])) {
+		// check against Apple AppStore
+		if(checkAppStore(APPSTORE_URL_PROD, $srcdata['params']['appstore_receipt'])
+			|| checkAppStore(APPSTORE_URL_TEST, $srcdata['params']['appstore_receipt'])) {
+			$paymentOk = true;
+		}
+	}
+	elseif(function_exists('checkPlayStore') && !empty($srcdata['params']['playstore_token'])) {
+		// check against Google PlayStore
+		if(checkPlayStore($srcdata['params']['playstore_token'])) {
+			$paymentOk = true;
+		}
+	}
+	if(!$paymentOk) {
+		$resdata['result'] = null;
+		$resdata['error'] = LANG['payment_authentication_failed'];
+		return $resdata;
+	}
+
 	// execute operation
 	$resdata['id'] = $srcdata['id'];
 	switch($srcdata['method']) {
