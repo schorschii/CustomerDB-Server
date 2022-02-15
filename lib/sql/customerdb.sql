@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Erstellungszeit: 23. Aug 2020 um 15:55
--- Server-Version: 10.3.22-MariaDB-0+deb10u1
--- PHP-Version: 7.3.14-1~deb10u1
+-- Erstellungszeit: 15. Feb 2022 um 19:36
+-- Server-Version: 10.3.31-MariaDB-0+deb10u1
+-- PHP-Version: 7.3.31-1~deb10u1
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET AUTOCOMMIT = 0;
@@ -112,6 +112,20 @@ CREATE TABLE `Customer` (
 -- --------------------------------------------------------
 
 --
+-- Tabellenstruktur für Tabelle `Setting`
+--
+
+CREATE TABLE `Setting` (
+  `id` bigint(20) NOT NULL,
+  `client_id` int(11) NOT NULL,
+  `setting` text NOT NULL,
+  `value` text NOT NULL,
+  `last_modified` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
 -- Tabellenstruktur für Tabelle `Voucher`
 --
 
@@ -163,6 +177,12 @@ ALTER TABLE `Customer`
   ADD PRIMARY KEY (`client_id`,`id`);
 
 --
+-- Indizes für die Tabelle `Setting`
+--
+ALTER TABLE `Setting`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indizes für die Tabelle `Voucher`
 --
 ALTER TABLE `Voucher`
@@ -177,6 +197,12 @@ ALTER TABLE `Voucher`
 --
 ALTER TABLE `Client`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT für Tabelle `Setting`
+--
+ALTER TABLE `Setting`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- Constraints der exportierten Tabellen
