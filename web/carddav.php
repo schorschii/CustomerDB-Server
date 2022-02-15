@@ -242,7 +242,8 @@ switch($_SERVER['REQUEST_METHOD']) {
 	// macOS contacts app is doing a GET request to retrieve single contacts if "addressbook-multiget" as supported report is not set
 	case 'GET':
 		foreach($db->getActiveCustomersByClient($userId) as $customer) {
-			if(intval(end(explode('/',$_SERVER['REQUEST_URI']))) === intval($customer->id)) {
+			$pathparts = explode('/', $_SERVER['REQUEST_URI']);
+			if(intval(end($pathparts)) === intval($customer->id)) {
 				header('HTTP/1.1 200 OK');
 				die(customerToVcard($customer));
 			}
