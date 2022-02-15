@@ -62,6 +62,10 @@ function handleApiRequestData($srcdata) {
 			$paymentOk = true;
 		}
 	}
+	elseif(!function_exists('checkAppStore') && !function_exists('checkPlayStore')) {
+		// self hosted server
+		$paymentOk = true;
+	}
 	if(!$paymentOk) {
 		$resdata['result'] = null;
 		$resdata['error'] = LANG['payment_authentication_failed'];
