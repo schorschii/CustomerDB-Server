@@ -291,26 +291,29 @@ function customerToVcard($customer) {
 	$vcard .= 'VERSION:3.0'."\n";
 	$vcard .= 'PRODID:-//SieberSystems//CustomerDatabaseServer//EN'."\n";
 	$vcard .= 'UID:'.$customer->id."\n";
-	$vcard .= 'FN;ENCODING=QUOTED-PRINTABLE:'.quoted_printable_encode(trim($customer->title.' '.$customer->first_name.' '.$customer->last_name))."\n";
-	$vcard .= 'N;ENCODING=QUOTED-PRINTABLE:'.quoted_printable_encode($customer->last_name).';'.quoted_printable_encode($customer->first_name).';;'.quoted_printable_encode($customer->title).";\n";
+	$vcard .= 'FN:'.escapeVcfValue(trim($customer->title.' '.$customer->first_name.' '.$customer->last_name))."\n";
+	$vcard .= 'N:'.escapeVcfValue($customer->last_name).';'.escapeVcfValue($customer->first_name).';;'.escapeVcfValue($customer->title).";\n";
 	if(!empty($customer->phone_home))
-		$vcard .= 'TEL;TYPE=HOME;ENCODING=QUOTED-PRINTABLE:'.quoted_printable_encode($customer->phone_home)."\n";
+		$vcard .= 'TEL;TYPE=HOME:'.escapeVcfValue($customer->phone_home)."\n";
 	if(!empty($customer->phone_mobile))
-		$vcard .= 'TEL;TYPE=CELL;ENCODING=QUOTED-PRINTABLE:'.quoted_printable_encode($customer->phone_mobile)."\n";
+		$vcard .= 'TEL;TYPE=CELL:'.escapeVcfValue($customer->phone_mobile)."\n";
 	if(!empty($customer->phone_work))
-		$vcard .= 'TEL;TYPE=WORK;ENCODING=QUOTED-PRINTABLE:'.quoted_printable_encode($customer->phone_work)."\n";
+		$vcard .= 'TEL;TYPE=WORK:'.escapeVcfValue($customer->phone_work)."\n";
 	if(!empty($customer->phone_email))
-		$vcard .= 'EMAIL;INTERNET;ENCODING=QUOTED-PRINTABLE:'.quoted_printable_encode($customer->email)."\n";
+		$vcard .= 'EMAIL;INTERNET:'.escapeVcfValue($customer->email)."\n";
 	if(!empty($customer->street) || !empty($customer->city) || !empty($customer->zipcode) || !empty($customer->country))
-		$vcard .= 'ADR;TYPE=HOME;ENCODING=QUOTED-PRINTABLE:;;'.quoted_printable_encode($customer->street).';'.quoted_printable_encode($customer->city).';;'.quoted_printable_encode($customer->zipcode).';'.quoted_printable_encode($customer->country)."\n";
+		$vcard .= 'ADR;TYPE=HOME:;;'.escapeVcfValue($customer->street).';'.escapeVcfValue($customer->city).';;'.escapeVcfValue($customer->zipcode).';'.escapeVcfValue($customer->country)."\n";
 	if(!empty($customer->customer_group))
-		$vcard .= 'ORG;ENCODING=QUOTED-PRINTABLE:'.quoted_printable_encode($customer->customer_group)."\n";
+		$vcard .= 'ORG:'.escapeVcfValue($customer->customer_group)."\n";
 	if(!empty($customer->birthday))
 		$vcard .= 'BDAY:'.date('Ymd', strtotime($customer->birthday))."\n";
 	if(!empty($customer->notes))
-		$vcard .= 'NOTE;ENCODING=QUOTED-PRINTABLE:'.quoted_printable_encode($customer->notes)."\n";
+		$vcard .= 'NOTE:'.escapeVcfValue($customer->notes)."\n";
 	if(!empty($customer->image))
 		$vcard .= 'PHOTO;ENCODING=BASE64;JPEG:'.base64_encode($customer->image)."\n";
 	$vcard .= 'END:VCARD'."\n";
 	return $vcard;
+}
+function escapeVcfValue($value) {
+	return str_replace("\n", "\\n", $value);
 }
