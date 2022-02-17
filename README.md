@@ -6,7 +6,7 @@ With this PHP web app you can set up your own server for the [Android](https://g
 
 ## Highlights
 - multi-tenant capable
-- *read-only* [CardDAV API](<docs/CardDAV API.md>) (e.g. for syncing with your router or email client)
+- *read-only* [CardDAV API](<docs/CardDAV API.md>) (e.g. for syncing with your email client or router phone book (for DECT phone))
 
 ## System Requirements
 - Linux OS (Debian recommended)
