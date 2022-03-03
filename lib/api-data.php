@@ -200,7 +200,7 @@ function handleApiRequestData($srcdata) {
 						$appointment['notes'],
 						isset($appointment['time_start']) ? $appointment['time_start'] : null,
 						isset($appointment['time_end']) ? $appointment['time_end'] : null,
-						$appointment['fullday'],
+						$appointment['fullday'] ? 1 : 0,
 						$appointment['customer'],
 						isset($appointment['customer_id']) ? $appointment['customer_id'] : null,
 						$appointment['location'],
