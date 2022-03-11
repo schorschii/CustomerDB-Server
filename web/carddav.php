@@ -222,7 +222,9 @@ switch($_SERVER['REQUEST_METHOD']) {
 
 				case 'address-data':
 						if($object != null) {
-							$prop->appendChild($domtree->createElement('c:address-data', customerToVcard($object)));
+							$addressdata = $domtree->createElement('c:address-data');
+							$addressdata->appendChild($domtree->createTextNode(customerToVcard($object)));
+							$prop->appendChild($addressdata);
 						}
 						break;
 				}
