@@ -7,11 +7,12 @@ if(!isset($argv[1]))
 
 require_once('lib/loader.php');
 
-$null = null;
-switch($argv[1]) {
+try {
 
-	case 'createuser':
-		try {
+	$null = null;
+	switch($argv[1]) {
+
+		case 'createuser':
 			if(!isset($argv[2]) || !isset($argv[3])) {
 				throw new Exception('missing arguments, need <username> <password>');
 			}
@@ -20,14 +21,9 @@ switch($argv[1]) {
 			} else {
 				throw new Exception('database operation error');
 			}
-		} catch(Exception $e) {
-			echo $argv[1].' ERROR: '.$e->getMessage()."\n";
-			exit(1);
-		}
-		break;
+			break;
 
-	case 'listuser':
-		try {
+		case 'listuser':
 			$clients = $db->getClients();
 			if($clients !== null) {
 				foreach($clients as $client) {
@@ -37,14 +33,9 @@ switch($argv[1]) {
 			} else {
 				throw new Exception('database operation error');
 			}
-		} catch(Exception $e) {
-			echo $argv[1].' ERROR: '.$e->getMessage()."\n";
-			exit(1);
-		}
-		break;
+			break;
 
-	case 'changeuserpasswd':
-		try {
+		case 'changeuserpasswd':
 			if(!isset($argv[2])) {
 				throw new Exception('missing arguments, need <userid> <new-password>');
 			}
@@ -57,14 +48,9 @@ switch($argv[1]) {
 			} else {
 				throw new Exception('userid not found');
 			}
-		} catch(Exception $e) {
-			echo $argv[1].' ERROR: '.$e->getMessage()."\n";
-			exit(1);
-		}
-		break;
+			break;
 
-	case 'deleteuser':
-		try {
+		case 'deleteuser':
 			if(!isset($argv[2])) {
 				throw new Exception('missing arguments, need <userid>');
 			}
@@ -77,14 +63,14 @@ switch($argv[1]) {
 			} else {
 				throw new Exception('userid not found');
 			}
-		} catch(Exception $e) {
-			echo $argv[1].' ERROR: '.$e->getMessage()."\n";
-			exit(1);
-		}
-		break;
+			break;
 
-	default:
-		echo $argv[1].' ERROR: unknown command'."\n";
-		exit(1);
+		default:
+			throw new Exception('unknown command');
 
+	}
+
+} catch(Exception $e) {
+	echo $argv[1].' ERROR: '.$e->getMessage()."\n";
+	exit(1);
 }
