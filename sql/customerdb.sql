@@ -41,6 +41,7 @@ CREATE TABLE `Appointment` (
   `customer_id` bigint(11) DEFAULT NULL,
   `location` text NOT NULL,
   `last_modified` datetime NOT NULL DEFAULT current_timestamp(),
+  `last_modified_on_server` datetime NOT NULL DEFAULT current_timestamp(),
   `removed` tinyint(4) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -57,6 +58,7 @@ CREATE TABLE `Calendar` (
   `color` text NOT NULL,
   `notes` text NOT NULL,
   `last_modified` datetime NOT NULL DEFAULT current_timestamp(),
+  `last_modified_on_server` datetime NOT NULL DEFAULT current_timestamp(),
   `removed` tinyint(4) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -106,6 +108,7 @@ CREATE TABLE `Customer` (
   `consent` longblob DEFAULT NULL,
   `files` longblob DEFAULT NULL,
   `last_modified` datetime NOT NULL DEFAULT current_timestamp(),
+  `last_modified_on_server` datetime NOT NULL DEFAULT current_timestamp(),
   `removed` tinyint(4) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
@@ -120,7 +123,8 @@ CREATE TABLE `Setting` (
   `client_id` int(11) NOT NULL,
   `setting` text NOT NULL,
   `value` text NOT NULL,
-  `last_modified` datetime NOT NULL DEFAULT current_timestamp()
+  `last_modified` datetime NOT NULL DEFAULT current_timestamp(),
+  `last_modified_on_server` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
@@ -144,6 +148,7 @@ CREATE TABLE `Voucher` (
   `redeemed` datetime DEFAULT NULL,
   `notes` text CHARACTER SET utf8mb4 NOT NULL,
   `last_modified` datetime NOT NULL DEFAULT current_timestamp(),
+  `last_modified_on_server` datetime NOT NULL DEFAULT current_timestamp(),
   `removed` tinyint(4) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 

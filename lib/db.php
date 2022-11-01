@@ -34,6 +34,10 @@ class db {
 		}
 	}
 
+	private static function currentUtcDateTime() {
+		return gmdate('Y-m-d H:i:s');
+	}
+
 	// Client Operations
 	public function getClient($id) {
 		$this->stmt = $this->dbh->prepare(
@@ -123,12 +127,13 @@ class db {
 	}
 
 	// Customer Operations
-	public function getCustomersByClient($clientId) {
+	public function getCustomersByClient($clientId, $diffSince=null) {
+		if(!$diffSince) $diffSince = '1970-01-01 00:00:00';
 		$this->stmt = $this->dbh->prepare(
 			'SELECT id, title, first_name, last_name, phone_home, phone_mobile, phone_work, email, street, zipcode, city, country, birthday, customer_group, newsletter, notes, custom_fields, image, consent, files, last_modified, removed
-			FROM Customer WHERE client_id = :client_id'
+			FROM Customer WHERE client_id = :client_id AND last_modified_on_server > :diff_since'
 		);
-		$this->stmt->execute([':client_id' => $clientId]);
+		$this->stmt->execute([':client_id' => $clientId, ':diff_since' => $diffSince]);
 		return $this->stmt->fetchAll(PDO::FETCH_CLASS, 'Customer');
 	}
 	public function getActiveCustomersByClient($clientId) {
@@ -152,10 +157,10 @@ class db {
 	public function markDeletedCustomerByClient($clientId, $id) {
 		$this->stmt = $this->dbh->prepare(
 			'UPDATE Customer
-			SET title = "", first_name = "", last_name = "", phone_home = "", phone_mobile = "", phone_work = "", email = "", street = "", zipcode = "", city = "", country = "", birthday = NULL, customer_group = "", newsletter = 0, notes = "", custom_fields = "", image = NULL, consent = NULL, files = NULL, last_modified = CURRENT_TIMESTAMP, removed = 1
+			SET title = "", first_name = "", last_name = "", phone_home = "", phone_mobile = "", phone_work = "", email = "", street = "", zipcode = "", city = "", country = "", birthday = NULL, customer_group = "", newsletter = 0, notes = "", custom_fields = "", image = NULL, consent = NULL, files = NULL, last_modified = :current_utc_time, last_modified_on_server = :current_utc_time, removed = 1
 			WHERE client_id = :client_id AND id = :id'
 		);
-		return $this->stmt->execute([':client_id' => $clientId, ':id' => $id]);
+		return $this->stmt->execute([':client_id' => $clientId, ':id' => $id, ':current_utc_time' => self::currentUtcDateTime()]);
 	}
 	public function insertUpdateCustomer($clientId, $id, $title, $firstName, $lastName, $phoneHome, $phoneMobile, $phoneWork, $email, $street, $zipcode, $city, $country, $birthday, $customerGroup, $newsletter, $notes, $customFields, $image, $consentImage, $files, $lastModified, $removed) {
 
@@ -170,7 +175,7 @@ class db {
 
 			// update if last_modified is newer than in stored record
 			$this->stmt = $this->dbh->prepare(
-				'UPDATE Customer SET title = :title, first_name = :first_name, last_name = :last_name, phone_home = :phone_home, phone_mobile = :phone_mobile, phone_work = :phone_work, email = :email, street = :street, zipcode = :zipcode, city = :city, country = :country, birthday = :birthday, customer_group = :customer_group, newsletter = :newsletter, notes = :notes, custom_fields = :custom_fields, image = :image, consent = :consent, files = :files, last_modified = :last_modified, removed = :removed
+				'UPDATE Customer SET title = :title, first_name = :first_name, last_name = :last_name, phone_home = :phone_home, phone_mobile = :phone_mobile, phone_work = :phone_work, email = :email, street = :street, zipcode = :zipcode, city = :city, country = :country, birthday = :birthday, customer_group = :customer_group, newsletter = :newsletter, notes = :notes, custom_fields = :custom_fields, image = :image, consent = :consent, files = :files, last_modified = :last_modified, last_modified_on_server = :last_modified_on_server, removed = :removed
 				WHERE client_id = :client_id AND id = :id AND last_modified < :last_modified'
 			);
 			return $this->stmt->execute([
@@ -196,6 +201,7 @@ class db {
 				':consent' => $consentImage,
 				':files' => $files,
 				':last_modified' => $lastModified,
+				':last_modified_on_server' => self::currentUtcDateTime(),
 				':removed' => $removed,
 			]);
 
@@ -203,8 +209,8 @@ class db {
 
 			// create new record
 			$this->stmt = $this->dbh->prepare(
-				'INSERT INTO Customer (client_id, id, title, first_name, last_name, phone_home, phone_mobile, phone_work, email, street, zipcode, city, country, birthday, customer_group, newsletter, notes, custom_fields, image, consent, files, last_modified, removed)
-				VALUES (:client_id, :id, :title, :first_name, :last_name, :phone_home, :phone_mobile, :phone_work, :email, :street, :zipcode, :city, :country, :birthday, :customer_group, :newsletter, :notes, :custom_fields, :image, :consent, :files, :last_modified, :removed)'
+				'INSERT INTO Customer (client_id, id, title, first_name, last_name, phone_home, phone_mobile, phone_work, email, street, zipcode, city, country, birthday, customer_group, newsletter, notes, custom_fields, image, consent, files, last_modified, last_modified_on_server, removed)
+				VALUES (:client_id, :id, :title, :first_name, :last_name, :phone_home, :phone_mobile, :phone_work, :email, :street, :zipcode, :city, :country, :birthday, :customer_group, :newsletter, :notes, :custom_fields, :image, :consent, :files, :last_modified, :last_modified_on_server, :removed)'
 			);
 			return $this->stmt->execute([
 				':client_id' => $clientId,
@@ -229,6 +235,7 @@ class db {
 				':consent' => $consentImage,
 				':files' => $files,
 				':last_modified' => $lastModified,
+				':last_modified_on_server' => self::currentUtcDateTime(),
 				':removed' => $removed,
 			]);
 
@@ -236,11 +243,12 @@ class db {
 	}
 
 	// Voucher Operations
-	public function getVouchersByClient($clientId) {
+	public function getVouchersByClient($clientId, $diffSince=null) {
+		if(!$diffSince) $diffSince = '1970-01-01 00:00:00';
 		$this->stmt = $this->dbh->prepare(
-			'SELECT * FROM Voucher WHERE client_id = :client_id'
+			'SELECT * FROM Voucher WHERE client_id = :client_id AND last_modified_on_server > :diff_since'
 		);
-		$this->stmt->execute([':client_id' => $clientId]);
+		$this->stmt->execute([':client_id' => $clientId, ':diff_since' => $diffSince]);
 		return $this->stmt->fetchAll(PDO::FETCH_CLASS, 'Voucher', [$this->getCurrencyByClient($clientId)]);
 	}
 	public function getActiveVouchersByClient($clientId) {
@@ -262,10 +270,10 @@ class db {
 	public function markDeletedVoucherByClient($clientId, $id) {
 		$this->stmt = $this->dbh->prepare(
 			'UPDATE Voucher
-			SET original_value = 0, current_value = 0, voucher_no = "", from_customer = "", from_customer_id = NULL, for_customer = "", for_customer_id = NULL, valid_until = NULL, redeemed = NULL, notes = "", last_modified = CURRENT_TIMESTAMP, removed = 1
+			SET original_value = 0, current_value = 0, voucher_no = "", from_customer = "", from_customer_id = NULL, for_customer = "", for_customer_id = NULL, valid_until = NULL, redeemed = NULL, notes = "", last_modified = :current_utc_time, last_modified_on_server = :current_utc_time, removed = 1
 			WHERE client_id = :client_id AND id = :id'
 		);
-		return $this->stmt->execute([':client_id' => $clientId, ':id' => $id]);
+		return $this->stmt->execute([':client_id' => $clientId, ':id' => $id, ':current_utc_time' => self::currentUtcDateTime()]);
 	}
 	public function insertUpdateVoucher($clientId, $id, $originalValue, $currentValue, $voucherNo, $fromCustomer, $fromCustomerId, $forCustomer, $forCustomerId, $issued, $validUntil, $redeemed, $notes, $lastModified, $removed) {
 
@@ -280,7 +288,7 @@ class db {
 
 			// update if last_modified is newer than in stored record
 			$this->stmt = $this->dbh->prepare(
-				'UPDATE Voucher SET original_value = :original_value, current_value = :current_value, voucher_no = :voucher_no, from_customer = :from_customer, from_customer_id = :from_customer_id, for_customer = :for_customer, for_customer_id = :for_customer_id, issued = :issued, valid_until = :valid_until, redeemed = :redeemed, notes = :notes, last_modified = :last_modified, removed = :removed
+				'UPDATE Voucher SET original_value = :original_value, current_value = :current_value, voucher_no = :voucher_no, from_customer = :from_customer, from_customer_id = :from_customer_id, for_customer = :for_customer, for_customer_id = :for_customer_id, issued = :issued, valid_until = :valid_until, redeemed = :redeemed, notes = :notes, last_modified = :last_modified, last_modified_on_server = :last_modified_on_server, removed = :removed
 				WHERE client_id = :client_id AND id = :id AND last_modified < :last_modified'
 			);
 			return $this->stmt->execute([
@@ -298,6 +306,7 @@ class db {
 				':redeemed' => $redeemed,
 				':notes' => $notes,
 				':last_modified' => $lastModified,
+				':last_modified_on_server' => self::currentUtcDateTime(),
 				':removed' => $removed,
 			]);
 
@@ -305,8 +314,8 @@ class db {
 
 			// create new record
 			$this->stmt = $this->dbh->prepare(
-				'INSERT INTO Voucher (client_id, id, original_value, current_value, voucher_no, from_customer, from_customer_id, for_customer, for_customer_id, issued, valid_until, redeemed, notes, last_modified, removed)
-				VALUES (:client_id, :id, :original_value, :current_value, :voucher_no, :from_customer, :from_customer_id, :for_customer, :for_customer_id, :issued, :valid_until, :redeemed, :notes, :last_modified, :removed)'
+				'INSERT INTO Voucher (client_id, id, original_value, current_value, voucher_no, from_customer, from_customer_id, for_customer, for_customer_id, issued, valid_until, redeemed, notes, last_modified, last_modified_on_server, removed)
+				VALUES (:client_id, :id, :original_value, :current_value, :voucher_no, :from_customer, :from_customer_id, :for_customer, :for_customer_id, :issued, :valid_until, :redeemed, :notes, :last_modified, :last_modified_on_server, :removed)'
 			);
 			return $this->stmt->execute([
 				':client_id' => $clientId,
@@ -323,6 +332,7 @@ class db {
 				':redeemed' => $redeemed,
 				':notes' => $notes,
 				':last_modified' => $lastModified,
+				':last_modified_on_server' => self::currentUtcDateTime(),
 				':removed' => $removed,
 			]);
 
@@ -330,11 +340,12 @@ class db {
 	}
 
 	// Appointment Operations
-	public function getAppointmentsByClient($clientId) {
+	public function getAppointmentsByClient($clientId, $diffSince=null) {
+		if(!$diffSince) $diffSince = '1970-01-01 00:00:00';
 		$this->stmt = $this->dbh->prepare(
-			'SELECT * FROM Appointment WHERE client_id = :id'
+			'SELECT * FROM Appointment WHERE client_id = :id AND last_modified_on_server > :diff_since'
 		);
-		$this->stmt->execute([':id' => $clientId]);
+		$this->stmt->execute([':id' => $clientId, ':diff_since' => $diffSince]);
 		return $this->stmt->fetchAll();
 	}
 	public function getActiveAppointmentsByClient($clientId) {
@@ -357,7 +368,7 @@ class db {
 
 			// update if last_modified is newer than in stored record
 			$this->stmt = $this->dbh->prepare(
-				'UPDATE Appointment SET calendar_id = :calendar_id, title = :title, notes = :notes, time_start = :time_start, time_end = :time_end, fullday = :fullday, customer = :customer, customer_id = :customer_id, location = :location, last_modified = :last_modified, removed = :removed
+				'UPDATE Appointment SET calendar_id = :calendar_id, title = :title, notes = :notes, time_start = :time_start, time_end = :time_end, fullday = :fullday, customer = :customer, customer_id = :customer_id, location = :location, last_modified = :last_modified, last_modified_on_server = :last_modified_on_server, removed = :removed
 				WHERE client_id = :client_id AND id = :id AND last_modified < :last_modified'
 			);
 			return $this->stmt->execute([
@@ -373,6 +384,7 @@ class db {
 				':customer_id' => $customerId,
 				':location' => $location,
 				':last_modified' => $lastModified,
+				':last_modified_on_server' => self::currentUtcDateTime(),
 				':removed' => $removed,
 			]);
 
@@ -380,8 +392,8 @@ class db {
 
 			// create new record
 			$this->stmt = $this->dbh->prepare(
-				'INSERT INTO Appointment (client_id, id, calendar_id, title, notes, time_start, time_end, fullday, customer, customer_id, location, last_modified, removed)
-				VALUES (:client_id, :id, :calendar_id, :title, :notes, :time_start, :time_end, :fullday, :customer, :customer_id, :location, :last_modified, :removed)'
+				'INSERT INTO Appointment (client_id, id, calendar_id, title, notes, time_start, time_end, fullday, customer, customer_id, location, last_modified, last_modified_on_server, removed)
+				VALUES (:client_id, :id, :calendar_id, :title, :notes, :time_start, :time_end, :fullday, :customer, :customer_id, :location, :last_modified, :last_modified_on_server, :removed)'
 			);
 			return $this->stmt->execute([
 				':client_id' => $clientId,
@@ -396,6 +408,7 @@ class db {
 				':customer_id' => $customerId,
 				':location' => $location,
 				':last_modified' => $lastModified,
+				':last_modified_on_server' => self::currentUtcDateTime(),
 				':removed' => $removed,
 			]);
 
@@ -403,11 +416,12 @@ class db {
 	}
 
 	// Calendar Operations
-	public function getCalendarsByClient($clientId) {
+	public function getCalendarsByClient($clientId, $diffSince=null) {
+		if(!$diffSince) $diffSince = '1970-01-01 00:00:00';
 		$this->stmt = $this->dbh->prepare(
-			'SELECT * FROM Calendar WHERE client_id = :id'
+			'SELECT * FROM Calendar WHERE client_id = :id AND last_modified_on_server > :diff_since'
 		);
-		$this->stmt->execute([':id' => $clientId]);
+		$this->stmt->execute([':id' => $clientId, ':diff_since' => $diffSince]);
 		return $this->stmt->fetchAll();
 	}
 	public function getActiveCalendarsByClient($clientId) {
@@ -430,7 +444,7 @@ class db {
 
 			// update if last_modified is newer than in stored record
 			$this->stmt = $this->dbh->prepare(
-				'UPDATE Calendar SET title = :title, color = :color, notes = :notes, last_modified = :last_modified, removed = :removed
+				'UPDATE Calendar SET title = :title, color = :color, notes = :notes, last_modified = :last_modified, last_modified_on_server = :last_modified_on_server, removed = :removed
 				WHERE client_id = :client_id AND id = :id AND last_modified < :last_modified'
 			);
 			return $this->stmt->execute([
@@ -440,6 +454,7 @@ class db {
 				':color' => $color,
 				':notes' => $notes,
 				':last_modified' => $lastModified,
+				':last_modified_on_server' => self::currentUtcDateTime(),
 				':removed' => $removed,
 			]);
 
@@ -447,8 +462,8 @@ class db {
 
 			// create new record
 			$this->stmt = $this->dbh->prepare(
-				'INSERT INTO Calendar (client_id, id, title, color, notes, last_modified, removed)
-				VALUES (:client_id, :id, :title, :color, :notes, :last_modified, :removed)'
+				'INSERT INTO Calendar (client_id, id, title, color, notes, last_modified, last_modified_on_server, removed)
+				VALUES (:client_id, :id, :title, :color, :notes, :last_modified, :last_modified_on_server, :removed)'
 			);
 			return $this->stmt->execute([
 				':client_id' => $clientId,
@@ -457,6 +472,7 @@ class db {
 				':color' => $color,
 				':notes' => $notes,
 				':last_modified' => $lastModified,
+				':last_modified_on_server' => self::currentUtcDateTime(),
 				':removed' => $removed,
 			]);
 

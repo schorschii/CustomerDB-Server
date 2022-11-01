@@ -17,14 +17,14 @@ With this PHP web app you can set up your own server for the [Android](https://g
 0. Install Apache 2, PHP 7 (with `php-curl`) and MySQL/MariaDB on a Linux server.
 1. Download the [latest release](https://github.com/schorschii/customerdb-server/releases) and unpack it into `/srv/www/customerdb`.
 2. Set your Apache (virtual host) web root directory to `/srv/www/customerdb/web` by editing the corresponding configuration file inside `/etc/apache2/sites-enabled`.
-3. Create a database on your MySQL server and import the schema from `lib/sql/customerdb.sql`.
+3. Create a database on your MySQL server and import the schema from `sql/customerdb.sql`.
 4. Edit/create `conf.php` from the example file (`conf.php.example`) and enter your MySQL credentials. Please do not use the root user but create a new user which is only allowed to operate on the specific database.
 5. Select "Own Server" in the settings of your Customer Database app and enter the full URL to the `web/api.php` script. Example: `http://192.168.2.10/api.php`.
 6. Create an account. You can do this in the app (if the API and registration is enabled in `conf.php`) or by using the command line tool on the server (`php console.php createuser <username> <password>`).
 
 ## Installation (On A Managed Server)
 1. Download the [latest release](https://github.com/schorschii/customerdb-server/releases) and unpack it into your webspace.
-2. Create a database on your MySQL server and import the schema from `lib/sql/customerdb.sql` using phpMyAdmin or a similar web-based tool from your hosting provider.
+2. Create a database on your MySQL server and import the schema from `sql/customerdb.sql` using phpMyAdmin or a similar web-based tool from your hosting provider.
 3. Edit/create `conf.php` from the example file (`conf.php.example`) and enter your MySQL credentials.
 4. Select "Own Server" in the settings of your Customer Database app and enter the full URL to the `web/api.php` script. Example: `http://example.com/web/api.php`.
 5. Ensure that the API and registration is enabled in `conf.php`. Now create a sync account inside the app.

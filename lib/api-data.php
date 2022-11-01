@@ -77,10 +77,18 @@ function handleApiRequestData($srcdata) {
 	switch($srcdata['method']) {
 
 		case 'customerdb.read':
-			$customers = $db->getCustomersByClient($userId);
-			$vouchers = $db->getVouchersByClient($userId);
-			$calendars = $db->getCalendarsByClient($userId);
-			$appointments = $db->getAppointmentsByClient($userId);
+			$diffSince = null;
+			if(isset($srcdata['params']['diff_since'])) $diffSince = strtotime($srcdata['params']['diff_since']);
+			if($diffSince === false) { // strtotime() returns false in case of parsing error
+				$resdata['result'] = null;
+				$resdata['error'] = 'Invalid Date';
+				break;
+			}
+
+			$customers = $db->getCustomersByClient($userId, date('Y-m-d H:i:s', $diffSince));
+			$vouchers = $db->getVouchersByClient($userId, date('Y-m-d H:i:s', $diffSince));
+			$calendars = $db->getCalendarsByClient($userId, date('Y-m-d H:i:s', $diffSince));
+			$appointments = $db->getAppointmentsByClient($userId, date('Y-m-d H:i:s', $diffSince));
 			foreach($customers as $customer) {
 				if($customer->image != null)
 					$customer->image = base64_encode($customer->image);
@@ -93,6 +101,7 @@ function handleApiRequestData($srcdata) {
 				'calendars' => $calendars,
 				'appointments' => $appointments,
 			];
+			#error_log(count($customers).' customers changed since '.date('Y-m-d H:i:s',$diffSince)); // debug
 			break;
 
 		case 'customerdb.put':
@@ -100,6 +109,7 @@ function handleApiRequestData($srcdata) {
 			$db->getDbHandle()->beginTransaction();
 
 			// todo check if all attr delivered before accessing it in array
+			#error_log(count($srcdata['params']['customers']).' customers put'); // debug
 			foreach($srcdata['params']['customers'] as $customer) {
 				foreach(['id', 'title', 'first_name', 'last_name', 'phone_home', 'phone_work',
 				'email', 'street', 'zipcode', 'city', 'country', 'customer_group',

@@ -18,8 +18,9 @@ A valid JSON-RPC request is sent via HTTP with the HTTP header `Content-Type: ap
 ```
 
 # Methods
-## `customers.read` - get all customers from server
+## `customers.read` - get customers from server
 ### Parameters
+- `diff_since` (optional) - only return records changed since this date
 - `username` - username for authentication
 - `password` - password for authentication
 - `playstore_token` (optional) - Google Play Store token for server-side subscription payment check (not of interest for self-hosted servers)
@@ -31,6 +32,7 @@ A valid JSON-RPC request is sent via HTTP with the HTTP header `Content-Type: ap
 	"id": 1,
 	"method": "customerdb.read",
 	"params": {
+		"diff_since": "2022-11-01 20:48:00",
 		"username": "test@example.com",
 		"password": "12345678"
 	}
@@ -75,7 +77,7 @@ A valid JSON-RPC request is sent via HTTP with the HTTP header `Content-Type: ap
 }
 ```
 
-## `customers.put` - upload/update all customers to server
+## `customers.put` - update/create customers on server
 ### Parameters
 - `username` - username for authentication
 - `password` - password for authentication
