@@ -13,6 +13,18 @@ try {
 	$null = null;
 	switch($argv[1]) {
 
+		case 'housekeeping':
+			if(!isset($argv[2]) || !isset($argv[3])) {
+				throw new Exception('missing arguments, need <inactive-since-days> <only-if-no-entries>');
+			}
+			$hk = new housekeeping($db->getDbHandle());
+			if($hk->cleanup(intval($argv[2]), boolval($argv[3]))) {
+				echo $argv[1].': OK'."\n";
+			} else {
+				throw new Exception('database operation error');
+			}
+			break;
+
 		case 'createuser':
 			if(!isset($argv[2]) || !isset($argv[3])) {
 				throw new Exception('missing arguments, need <username> <password>');
