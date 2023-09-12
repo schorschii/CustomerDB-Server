@@ -127,12 +127,30 @@ class db {
 	}
 
 	// Customer Operations
-	public function getCustomersByClient($clientId, $diffSince=null) {
-		if(!$diffSince) $diffSince = '1970-01-01 00:00:00';
+	public function getCustomerByClient($clientId, $customerId) {
 		$this->stmt = $this->dbh->prepare(
 			'SELECT id, title, first_name, last_name, phone_home, phone_mobile, phone_work, email, street, zipcode, city, country, birthday, customer_group, newsletter, notes, custom_fields, image, consent, files, last_modified, removed
-			FROM Customer WHERE client_id = :client_id AND last_modified_on_server > :diff_since'
+			FROM Customer WHERE client_id = :client_id AND id = :customer_id'
 		);
+		$this->stmt->execute([':client_id' => $clientId, ':customer_id' => $customerId]);
+		foreach($this->stmt->fetchAll(PDO::FETCH_CLASS, 'Customer') as $result) {
+			return $result;
+		}
+	}
+	public function getCustomersByClient($clientId, $diffSince=null, $files=false) {
+		// $files directly in all customers response for supporting older app versions
+		if(!$diffSince) $diffSince = '1970-01-01 00:00:00';
+		if($files) {
+			$this->stmt = $this->dbh->prepare(
+				'SELECT id, title, first_name, last_name, phone_home, phone_mobile, phone_work, email, street, zipcode, city, country, birthday, customer_group, newsletter, notes, custom_fields, image, consent, files, last_modified, removed
+				FROM Customer WHERE client_id = :client_id AND last_modified_on_server > :diff_since'
+			);
+		} else {
+			$this->stmt = $this->dbh->prepare(
+				'SELECT id, title, first_name, last_name, phone_home, phone_mobile, phone_work, email, street, zipcode, city, country, birthday, customer_group, newsletter, notes, custom_fields, image, consent, IF(files IS NULL, NULL, TRUE) AS "files", last_modified, removed
+				FROM Customer WHERE client_id = :client_id AND last_modified_on_server > :diff_since'
+			);
+		}
 		$this->stmt->execute([':client_id' => $clientId, ':diff_since' => $diffSince]);
 		return $this->stmt->fetchAll(PDO::FETCH_CLASS, 'Customer');
 	}

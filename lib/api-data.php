@@ -76,7 +76,13 @@ function handleApiRequestData($srcdata) {
 	$resdata['id'] = $srcdata['id'];
 	switch($srcdata['method']) {
 
+		case 'customerdb.read.customer':
+			$resdata['result'] = $db->getCustomerByClient($userId, $srcdata['params']['customer_id'] ?? 0);
+			break;
+
 		case 'customerdb.read':
+			$filesFlag = $srcdata['params']['files'] ?? true;
+
 			$diffSince = null;
 			if(isset($srcdata['params']['diff_since'])) $diffSince = strtotime($srcdata['params']['diff_since']);
 			if($diffSince === false) { // strtotime() returns false in case of parsing error
@@ -85,7 +91,7 @@ function handleApiRequestData($srcdata) {
 				break;
 			}
 
-			$customers = $db->getCustomersByClient($userId, date('Y-m-d H:i:s', $diffSince));
+			$customers = $db->getCustomersByClient($userId, date('Y-m-d H:i:s', $diffSince), $filesFlag);
 			$vouchers = $db->getVouchersByClient($userId, date('Y-m-d H:i:s', $diffSince));
 			$calendars = $db->getCalendarsByClient($userId, date('Y-m-d H:i:s', $diffSince));
 			$appointments = $db->getAppointmentsByClient($userId, date('Y-m-d H:i:s', $diffSince));

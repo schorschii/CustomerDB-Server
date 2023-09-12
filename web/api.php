@@ -19,6 +19,7 @@ if($srcdata === null || !isset($srcdata['jsonrpc']) || $srcdata['jsonrpc'] != '2
 // execute operation
 $resdata = null;
 switch($srcdata['method']) {
+	case 'customerdb.read.customer':
 	case 'customerdb.read':
 	case 'customerdb.put':
 		$resdata = handleApiRequestData($srcdata);
