@@ -364,14 +364,14 @@ class db {
 			'SELECT * FROM Appointment WHERE client_id = :id AND last_modified_on_server > :diff_since'
 		);
 		$this->stmt->execute([':id' => $clientId, ':diff_since' => $diffSince]);
-		return $this->stmt->fetchAll();
+		return $this->stmt->fetchAll(PDO::FETCH_CLASS, 'Appointment');
 	}
 	public function getActiveAppointmentsByClient($clientId) {
 		$this->stmt = $this->dbh->prepare(
 			'SELECT * FROM Appointment WHERE removed = 0 AND client_id = :client_id'
 		);
 		$this->stmt->execute([':client_id' => $clientId]);
-		return $this->stmt->fetchAll();
+		return $this->stmt->fetchAll(PDO::FETCH_CLASS, 'Appointment');
 	}
 	public function insertUpdateAppointment($clientId, $id, $calendarId, $title, $notes, $timeStart, $timeEnd, $fullday, $customer, $customerId, $location, $lastModified, $removed) {
 
@@ -440,14 +440,14 @@ class db {
 			'SELECT * FROM Calendar WHERE client_id = :id AND last_modified_on_server > :diff_since'
 		);
 		$this->stmt->execute([':id' => $clientId, ':diff_since' => $diffSince]);
-		return $this->stmt->fetchAll();
+		return $this->stmt->fetchAll(PDO::FETCH_CLASS, 'Calendar');
 	}
 	public function getActiveCalendarsByClient($clientId) {
 		$this->stmt = $this->dbh->prepare(
 			'SELECT * FROM Calendar WHERE removed = 0 AND client_id = :client_id'
 		);
 		$this->stmt->execute([':client_id' => $clientId]);
-		return $this->stmt->fetchAll();
+		return $this->stmt->fetchAll(PDO::FETCH_CLASS, 'Calendar');
 	}
 	public function insertUpdateCalendar($clientId, $id, $title, $color, $notes, $lastModified, $removed) {
 
