@@ -9,7 +9,7 @@ A valid JSON-RPC request is sent via HTTP with the HTTP header `Content-Type: ap
 ```
 {
 	"version": "2.0",
-	"method": "customers.read",
+	"method": "customerdb.read",
 	"params": {
 		...................
 	},
@@ -18,9 +18,10 @@ A valid JSON-RPC request is sent via HTTP with the HTTP header `Content-Type: ap
 ```
 
 # Methods
-## `customers.read` - get customers from server
+## `customerdb.read` - get customers from server
 ### Parameters
 - `diff_since` (optional) - only return records changed since this date
+- `files` (optional, default `true` for backward compatibility) - boolean indicating wether to include customer files in the response (`true` is deprecated and will be removed in a future release, use `customerdb.read.customer` instead for getting file of a specific customer)
 - `username` - username for authentication
 - `password` - password for authentication
 - `playstore_token` (optional) - Google Play Store token for server-side subscription payment check (not of interest for self-hosted servers)
@@ -33,6 +34,7 @@ A valid JSON-RPC request is sent via HTTP with the HTTP header `Content-Type: ap
 	"method": "customerdb.read",
 	"params": {
 		"diff_since": "2022-11-01 20:48:00",
+		"files": false,
 		"username": "test@example.com",
 		"password": "12345678"
 	}
@@ -63,7 +65,7 @@ A valid JSON-RPC request is sent via HTTP with the HTTP header `Content-Type: ap
 				"notes": "Your text here!",
 				"image": null,
 				"consent": null,
-				"files": null,
+				"files": "1",
 				"custom_fields": "MyField=MyValue&",
 				"last_modified": "2020-02-29 15:58:18",
 				"removed": 0
@@ -77,7 +79,59 @@ A valid JSON-RPC request is sent via HTTP with the HTTP header `Content-Type: ap
 }
 ```
 
-## `customers.put` - update/create customers on server
+## `customerdb.read.customer` - get details of a customer with files
+Use this method to get customer's files. It is necessary to query files per customer individually because otherwise, the JSON response with files for all customers can get too big and cause memory error on server and client.
+### Parameters
+- `customer_id` - the ID of the customer to get
+- `username` - username for authentication
+- `password` - password for authentication
+- `playstore_token` (optional) - Google Play Store token for server-side subscription payment check (not of interest for self-hosted servers)
+- `appstore_token` (optional) - Apple App Store token for server-side subscription payment check (not of interest for self-hosted servers)
+### Example
+```
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"method": "customerdb.read.customer",
+	"params": {
+		"customer_id": 123456,
+		"username": "test@example.com",
+		"password": "12345678"
+	}
+}
+```
+```
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": {
+		"id": "202011011159270",
+		"title": "Mr.",
+		"first_name": "Hans",
+		"last_name": "Wurst",
+		"phone_home": "123456",
+		"phone_mobile": "098765",
+		"phone_work": "123456",
+		"email": "test@example.com",
+		"street": "1234 Main St.",
+		"zipcode": "97000",
+		"city": "Anytown",
+		"country": "Or.",
+		"birthday": "2020-02-28 00:00:00",
+		"customer_group": "MyGroup",
+		"newsletter": 0,
+		"notes": "Your text here!",
+		"custom_fields": "MyField=MyValue&",
+		"image": <base64 encoded image>,
+		"consent": null,
+		"files": "[{\"name\":\"test.jpg\",\"content\":\"<base64 encoded content>"}]",
+		"last_modified": "2020-02-29 15:58:18",
+		"removed": "0"
+	}
+}
+```
+
+## `customerdb.put` - update/create customers on server
 ### Parameters
 - `username` - username for authentication
 - `password` - password for authentication
