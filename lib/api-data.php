@@ -77,7 +77,12 @@ function handleApiRequestData($srcdata) {
 	switch($srcdata['method']) {
 
 		case 'customerdb.read.customer':
-			$resdata['result'] = $db->getCustomerByClient($userId, $srcdata['params']['customer_id'] ?? 0);
+			$customer = $db->getCustomerByClient($userId, $srcdata['params']['customer_id'] ?? 0);
+			if($customer->image != null)
+				$customer->image = base64_encode($customer->image);
+			if($customer->consent != null)
+				$customer->consent = base64_encode($customer->consent);
+			$resdata['result'] = $customer;
 			break;
 
 		case 'customerdb.read':
