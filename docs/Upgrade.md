@@ -1,5 +1,8 @@
 # Upgrade Instructions
 
+## v1.4
+no database changes
+
 ## v1.3
 - upgrade database schema as defined in `lib/customerdb.sql`
   - add column 'last_modified_on_server' to Customer, Voucher, Calendar, Appointment and Setting table
