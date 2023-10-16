@@ -21,7 +21,7 @@ A valid JSON-RPC request is sent via HTTP with the HTTP header `Content-Type: ap
 ## `customerdb.read` - get customers from server
 ### Parameters
 - `diff_since` (optional) - only return records changed since this date
-- `files` (optional, default `true` for backward compatibility) - boolean indicating wether to include customer files in the response (`true` is deprecated and will be removed in a future release, use `customerdb.read.customer` instead for getting file of a specific customer)
+- `files` (optional, default `true` for backward compatibility) - boolean indicating whether to include customer files in the response (`true` is deprecated and will be removed in a future release, use `customerdb.read.customer` instead for getting file of a specific customer)
 - `username` - username for authentication
 - `password` - password for authentication
 - `playstore_token` (optional) - Google Play Store token for server-side subscription payment check (not of interest for self-hosted servers)
@@ -80,7 +80,7 @@ A valid JSON-RPC request is sent via HTTP with the HTTP header `Content-Type: ap
 ```
 
 ## `customerdb.read.customer` - get details of a customer with files
-Use this method to get customer's files. It is necessary to query files per customer individually because otherwise, the JSON response with files for all customers can get too big and cause memory error on server and client.
+Use this method to get customer's files. It is necessary to query files per customer individually because otherwise, the JSON response with files for all customers can get too big and cause JSON parsing errors on server and/or client.
 ### Parameters
 - `customer_id` - the ID of the customer to get
 - `username` - username for authentication
