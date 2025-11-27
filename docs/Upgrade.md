@@ -1,5 +1,12 @@
 # Upgrade Instructions
 
+## v1.5
+- upgrade database schema as defined in `lib/customerdb.sql`
+  - `ALTER TABLE Client ADD created DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER last_login;`
+  - `ALTER TABLE Client CHANGE last_login last_login DATETIME NULL DEFAULT NULL;`
+  - `UPDATE Client SET created = last_login WHERE 1;`
+  - `UPDATE Client SET last_login = NULL;`
+
 ## v1.4
 no database changes
 

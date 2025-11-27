@@ -13,16 +13,22 @@ try {
 	$null = null;
 	switch($argv[1]) {
 
-		case 'housekeeping':
-			if(!isset($argv[2]) || !isset($argv[3])) {
+		case 'cleanup-inactive-users':
+			if(!isset($argv[2]) || !isset($argv[3]))
 				throw new Exception('missing arguments, need <inactive-since-days> <only-if-no-entries>');
-			}
 			$hk = new housekeeping($db->getDbHandle());
-			if($hk->cleanup(intval($argv[2]), boolval($argv[3]))) {
-				echo $argv[1].': OK'."\n";
-			} else {
+			$count = $hk->cleanupInactiveUsers(intval($argv[2]), boolval($argv[3]));
+			if($count === false)
 				throw new Exception('database operation error');
-			}
+			echo $argv[1].': deleted clients: '.$count."\n";
+			break;
+
+		case 'cleanup-unverified-users':
+			if(!isset($argv[2]))
+				throw new Exception('missing arguments, need <unverified-since-days>');
+			$hk = new housekeeping($db->getDbHandle());
+			$count = $hk->cleanupUnverifiedUsers(intval($argv[2]));
+			echo $argv[1].': deleted clients: '.$count."\n";
 			break;
 
 		case 'createuser':

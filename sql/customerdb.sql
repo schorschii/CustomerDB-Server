@@ -75,7 +75,8 @@ CREATE TABLE `Client` (
   `pending_activation_token` text DEFAULT NULL,
   `pending_reset_token` text DEFAULT NULL,
   `pending_deletion_token` text DEFAULT NULL,
-  `last_login` datetime NOT NULL DEFAULT current_timestamp(),
+  `last_login` datetime NULL DEFAULT NULL,
+  `created` datetime NOT NULL DEFAULT current_timestamp(),
   `check_payment` bit(1) NOT NULL DEFAULT b'1'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
