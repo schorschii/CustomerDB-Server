@@ -25,4 +25,11 @@ const PLAYSTORE_SKUID    = 'sync';
 
 const APPSTORE_BUNDLEID  = 'systems.sieber.customerdb';
 const APPSTORE_PRODUCTID = APPSTORE_BUNDLEID.'.cal';
+// legacy API
 const APPSTORE_SECRET    = '';
+// new API
+const STOREKIT_ISSUER_ID = 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx';
+const STOREKIT_KEY_ID    = 'ABCDEFGHIJ';
+const STOREKIT_KEY       = '-----BEGIN PRIVATE KEY-----
+.....
+-----END PRIVATE KEY-----';

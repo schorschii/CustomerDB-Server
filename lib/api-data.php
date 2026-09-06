@@ -57,12 +57,22 @@ function handleApiRequestData($srcdata) {
 			$paymentOk = true;
 		}
 	}
+	elseif(!empty($srcdata['params']['appstore_transaction'])) {
+		// check against Apple StoreKit API
+		$sk = new Apple\StoreKit(STOREKIT_ISSUER_ID, STOREKIT_KEY_ID, STOREKIT_KEY);
+		if($sk->checkStoreKit(APPSTORE_BUNDLEID, $srcdata['params']['appstore_transaction'], true)
+		|| $sk->checkStoreKit(APPSTORE_BUNDLEID, $srcdata['params']['appstore_transaction'], false)) {
+			$paymentOk = true;
+		}
+	}
 	elseif(!empty($srcdata['params']['playstore_token'])) {
 		// check against Google PlayStore
 		$ps = new Google\PlayStore('../conf-googleapi.json');
 		if($ps->checkPlayStore($srcdata['params']['playstore_token'])) {
 			$paymentOk = true;
 		}
+	} else {
+		error_log('Got no payment info but payment is obligatory');
 	}
 	if(!$paymentOk) {
 		$resdata['result'] = null;

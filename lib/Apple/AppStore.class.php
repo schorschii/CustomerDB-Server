@@ -14,11 +14,15 @@ class AppStore {
 	}
 
 	function checkAppStore($receipt, $productId, $production=true) {
-		$responseData = $this->getReceipt($receipt, $production);
-		if(self::containsReceiptValidProduct($responseData, $productId)) {
-			return true;
-		} else {
-			error_log('Apple AppStore receipt does not contain valid '.$productId);
+		try {
+			$responseData = $this->getReceipt($receipt, $production);
+			if(self::containsReceiptValidProduct($responseData, $productId)) {
+				return true;
+			} else {
+				throw new \RuntimeException('Apple AppStore receipt does not contain valid '.$productId);
+			}
+		} catch(\RuntimeException $e) {
+			error_log($e->getMessage());
 		}
 		return false;
 	}
