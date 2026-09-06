@@ -45,26 +45,24 @@ function handleApiRequestData($srcdata) {
 
 	// check cloud access license payment
 	$paymentOk = false;
-	if($user->check_payment == 0) {
-		// special customers that can use the sync for free
+	if(CHECK_PAYMENT === false || $user->check_payment == 0) {
+		// special customers and self-hosted servers can use the sync for free
 		$paymentOk = true;
 	}
-	elseif(function_exists('checkAppStore') && !empty($srcdata['params']['appstore_receipt'])) {
-		// check against Apple AppStore
-		if(checkAppStore(APPSTORE_URL_PROD, $srcdata['params']['appstore_receipt'])
-			|| checkAppStore(APPSTORE_URL_TEST, $srcdata['params']['appstore_receipt'])) {
+	elseif(!empty($srcdata['params']['appstore_receipt'])) {
+		// check against Apple AppStore (legacy)
+		$as = new Apple\AppStore(APPSTORE_SECRET);
+		if($as->checkAppStore($srcdata['params']['appstore_receipt'], APPSTORE_PRODUCTID, true)
+		|| $as->checkAppStore($srcdata['params']['appstore_receipt'], APPSTORE_PRODUCTID, false)) {
 			$paymentOk = true;
 		}
 	}
-	elseif(function_exists('checkPlayStore') && !empty($srcdata['params']['playstore_token'])) {
+	elseif(!empty($srcdata['params']['playstore_token'])) {
 		// check against Google PlayStore
-		if(checkPlayStore($srcdata['params']['playstore_token'])) {
+		$ps = new Google\PlayStore('../conf-googleapi.json');
+		if($ps->checkPlayStore($srcdata['params']['playstore_token'])) {
 			$paymentOk = true;
 		}
-	}
-	elseif(!function_exists('checkAppStore') && !function_exists('checkPlayStore')) {
-		// self hosted server
-		$paymentOk = true;
 	}
 	if(!$paymentOk) {
 		$resdata['result'] = null;

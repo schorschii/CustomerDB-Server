@@ -1,18 +1,28 @@
 <?php
 
 // General Config
-const DEFAULT_CURRENCY      = "€";
+const DEFAULT_CURRENCY      = '€';
 const FRONTEND_ENABLED      = false;
 const API_ENABLED           = true;
 const REGISTRATION_ENABLED  = true;
 const VERIFY_EMAIL_REQUIRED = false;
-const MAIL_SENDER_ADDRESS   = "noreply@customerdb.example.com";
-const WEB_BASE_URL          = "https://customerdb.example.com";
+const MAIL_SENDER_ADDRESS   = 'noreply@customerdb.example.com';
+const WEB_BASE_URL          = 'https://customerdb.example.com';
 
 // MySQL Credentials
-const DB_TYPE = "mysql";
-const DB_PORT = "3306";
-const DB_HOST = "localhost";
-const DB_USER = "customerdb";
-const DB_PASS = "PASSWORD";
-const DB_NAME = "customerdb";
+const DB_TYPE = 'mysql';
+const DB_PORT = '3306';
+const DB_HOST = 'localhost';
+const DB_USER = 'customerdb';
+const DB_PASS = 'PASSWORD';
+const DB_NAME = 'customerdb';
+
+// Store Config (optional for validating cloud access license)
+const CHECK_PAYMENT      = false;
+
+const PLAYSTORE_APPID    = 'de.georgsieber.customerdb';
+const PLAYSTORE_SKUID    = 'sync';
+
+const APPSTORE_BUNDLEID  = 'systems.sieber.customerdb';
+const APPSTORE_PRODUCTID = APPSTORE_BUNDLEID.'.cal';
+const APPSTORE_SECRET    = '';
