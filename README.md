@@ -33,7 +33,7 @@ With this PHP web app you can set up your own server for the [Android](https://g
 ## Further (Optional) Steps
 Especially if your server is available from the internet (and not only locally in your home network):
 - it is highly recommended to setup HTTPS on your web server
-- it is highly recommended to setup fail2ban on your web server (see [lib/fail2ban](lib/fail2ban/README.md) for more information)
+- it is highly recommended to setup fail2ban on your web server (see [docs/fail2ban](docs/fail2ban/README.md) for more information)
 - you may want to disable the user registration in the `conf.php` file (you can also disable the API or the web frontend here)
 
 ## Upgrade
