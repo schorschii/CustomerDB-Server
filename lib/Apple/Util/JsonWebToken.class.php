@@ -20,12 +20,13 @@ class JsonWebToken {
 		return base64_decode($value, true);
 	}
 
-	static function generateJwt($alg, $key, $kid, $tid, $aud=null, $bid=null) {
+	static function generateJwt($alg, $key, $kid, $tid, $aud=null, $bid=null, $scope=null) {
 		$jwtHead = json_encode(['alg'=>$alg, 'kid'=>$kid]);
 
 		$jwtBodyData = ['iss'=>$tid, 'iat'=>time(), 'exp'=>strtotime('+1 hour')];
 		if($aud) $jwtBodyData['aud'] = $aud;
 		if($bid) $jwtBodyData['bid'] = $bid;
+		if($scope) $jwtBodyData['scope'] = $scope;
 		$jwtBody = json_encode($jwtBodyData);
 
 		$jwt = self::base64UrlEncode($jwtHead).'.'.self::base64UrlEncode($jwtBody);
