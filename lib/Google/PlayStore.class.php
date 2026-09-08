@@ -37,7 +37,7 @@ class PlayStore {
 		return $token['access_token'];
 	}
 	private function getAccessToken() {
-		$creds = json_decode(file_get_contents($this->mAuthConfig), true);
+		$creds = json_decode($this->mAuthConfig, true);
 		$token = $this->apiCall('POST', 'https://www.googleapis.com/oauth2/v4/token', http_build_query([
 			'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
 			'assertion' => JsonWebToken::generateJwt('RS256',

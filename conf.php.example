@@ -22,6 +22,18 @@ const CHECK_PAYMENT      = false;
 
 const PLAYSTORE_APPID    = 'de.georgsieber.customerdb';
 const PLAYSTORE_SKUID    = 'sync';
+const PLAYSTORE_AUTH     = '{
+  "type": "service_account",
+  "project_id": "api-xxx-xx",
+  "private_key_id": "xxxxx",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nxxxxxx\n-----END PRIVATE KEY-----\n",
+  "client_email": "xxx@xxx-xxx-xx.iam.gserviceaccount.com",
+  "client_id": "xxxxx",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/xxxxx"
+}';
 
 const APPSTORE_BUNDLEID  = 'systems.sieber.customerdb';
 const APPSTORE_PRODUCTID = APPSTORE_BUNDLEID.'.cal';

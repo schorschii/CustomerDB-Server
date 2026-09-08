@@ -67,7 +67,7 @@ function handleApiRequestData($srcdata) {
 	}
 	elseif(!empty($srcdata['params']['playstore_token'])) {
 		// check against Google PlayStore
-		$ps = new Google\PlayStore('../conf-googleapi.json');
+		$ps = new Google\PlayStore(PLAYSTORE_AUTH);
 		if($ps->checkPlayStore($srcdata['params']['playstore_token'], PLAYSTORE_APPID, PLAYSTORE_SKUID)) {
 			$paymentOk = true;
 		}
