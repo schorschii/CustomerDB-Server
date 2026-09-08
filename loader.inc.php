@@ -2,11 +2,7 @@
 
 // static imports
 require_once(__DIR__.'/conf.php');
-require_once(__DIR__.'/lib/models.php');
-require_once(__DIR__.'/lib/db.php');
-require_once(__DIR__.'/lib/housekeeping.php');
 require_once(__DIR__.'/lib/lang.php');
-require_once(__DIR__.'/lib/account.php');
 require_once(__DIR__.'/lib/api-data.php');
 require_once(__DIR__.'/lib/api-account.php');
 
@@ -22,4 +18,4 @@ spl_autoload_register(function ($class) {
 });
 
 // init db connection
-$db = new db();
+$db = new DatabaseController();

@@ -16,7 +16,7 @@ try {
 		case 'cleanup-inactive-users':
 			if(!isset($argv[2]) || !isset($argv[3]))
 				throw new Exception('missing arguments, need <inactive-since-days> <only-if-no-entries>');
-			$hk = new housekeeping($db->getDbHandle());
+			$hk = new Housekeeping($db->getDbHandle());
 			$count = $hk->cleanupInactiveUsers(intval($argv[2]), boolval($argv[3]));
 			if($count === false)
 				throw new Exception('database operation error');
@@ -26,7 +26,7 @@ try {
 		case 'cleanup-unverified-users':
 			if(!isset($argv[2]))
 				throw new Exception('missing arguments, need <unverified-since-days>');
-			$hk = new housekeeping($db->getDbHandle());
+			$hk = new Housekeeping($db->getDbHandle());
 			$count = $hk->cleanupUnverifiedUsers(intval($argv[2]));
 			echo $argv[1].': deleted clients: '.$count."\n";
 			break;

@@ -1,10 +1,11 @@
 <?php
+
 /* Recommended Cleanup Commands:
    php console.php housekeeping 365 1   -   purge users not logged in since one year and no uploaded data
    php console.php housekeeping 730 0   -   purge users not logged in since two years, no matter if they have uploaded data
 */
 
-class housekeeping {
+class Housekeeping {
 
 	private $dbh;
 	private $stmt;

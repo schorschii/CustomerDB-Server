@@ -1,6 +1,7 @@
 <?php
 
-class db {
+class DatabaseController {
+
 	private $dbh;
 	private $stmt;
 
@@ -44,7 +45,7 @@ class db {
 			'SELECT * FROM Client WHERE id = :id'
 		);
 		$this->stmt->execute([':id' => $id]);
-		foreach($this->stmt->fetchAll(PDO::FETCH_CLASS, 'Client') as $row) {
+		foreach($this->stmt->fetchAll(PDO::FETCH_CLASS, 'Models\Client') as $row) {
 			return $row;
 		}
 	}
@@ -53,14 +54,14 @@ class db {
 			'SELECT * FROM Client'
 		);
 		$this->stmt->execute();
-		return $this->stmt->fetchAll(PDO::FETCH_CLASS, 'Client');
+		return $this->stmt->fetchAll(PDO::FETCH_CLASS, 'Models\Client');
 	}
 	public function getClientByEmail($email) {
 		$this->stmt = $this->dbh->prepare(
 			'SELECT * FROM Client WHERE email = :email'
 		);
 		$this->stmt->execute([':email' => $email]);
-		return $this->stmt->fetchAll(PDO::FETCH_CLASS, 'Client');
+		return $this->stmt->fetchAll(PDO::FETCH_CLASS, 'Models\Client');
 	}
 	public function insertClient($email, $password, $activation_token) {
 		if(count($this->getClientByEmail($email)) > 0) return -1;
@@ -133,7 +134,7 @@ class db {
 			FROM Customer WHERE client_id = :client_id AND id = :customer_id'
 		);
 		$this->stmt->execute([':client_id' => $clientId, ':customer_id' => $customerId]);
-		foreach($this->stmt->fetchAll(PDO::FETCH_CLASS, 'Customer') as $result) {
+		foreach($this->stmt->fetchAll(PDO::FETCH_CLASS, 'Models\Customer') as $result) {
 			return $result;
 		}
 	}
@@ -152,7 +153,7 @@ class db {
 			);
 		}
 		$this->stmt->execute([':client_id' => $clientId, ':diff_since' => $diffSince]);
-		return $this->stmt->fetchAll(PDO::FETCH_CLASS, 'Customer');
+		return $this->stmt->fetchAll(PDO::FETCH_CLASS, 'Models\Customer');
 	}
 	public function getActiveCustomersByClient($clientId) {
 		$this->stmt = $this->dbh->prepare(
@@ -160,7 +161,7 @@ class db {
 			FROM Customer WHERE removed = 0 AND client_id = :client_id'
 		);
 		$this->stmt->execute([':client_id' => $clientId]);
-		return $this->stmt->fetchAll(PDO::FETCH_CLASS, 'Customer');
+		return $this->stmt->fetchAll(PDO::FETCH_CLASS, 'Models\Customer');
 	}
 	public function getActiveCustomerByClient($clientId, $id) {
 		$this->stmt = $this->dbh->prepare(
@@ -168,7 +169,7 @@ class db {
 			FROM Customer WHERE removed = 0 AND client_id = :client_id AND id = :id'
 		);
 		$this->stmt->execute([':client_id' => $clientId, ':id' => $id]);
-		foreach($this->stmt->fetchAll(PDO::FETCH_CLASS, 'Customer') as $customer) {
+		foreach($this->stmt->fetchAll(PDO::FETCH_CLASS, 'Models\Customer') as $customer) {
 			return $customer;
 		}
 	}
@@ -267,21 +268,21 @@ class db {
 			'SELECT * FROM Voucher WHERE client_id = :client_id AND last_modified_on_server > :diff_since'
 		);
 		$this->stmt->execute([':client_id' => $clientId, ':diff_since' => $diffSince]);
-		return $this->stmt->fetchAll(PDO::FETCH_CLASS, 'Voucher', [$this->getCurrencyByClient($clientId)]);
+		return $this->stmt->fetchAll(PDO::FETCH_CLASS, 'Models\Voucher', [$this->getCurrencyByClient($clientId)]);
 	}
 	public function getActiveVouchersByClient($clientId) {
 		$this->stmt = $this->dbh->prepare(
 			'SELECT * FROM Voucher WHERE removed = 0 AND client_id = :client_id'
 		);
 		$this->stmt->execute([':client_id' => $clientId]);
-		return $this->stmt->fetchAll(PDO::FETCH_CLASS, 'Voucher', [$this->getCurrencyByClient($clientId)]);
+		return $this->stmt->fetchAll(PDO::FETCH_CLASS, 'Models\Voucher', [$this->getCurrencyByClient($clientId)]);
 	}
 	public function getActiveVoucherByClient($clientId, $id) {
 		$this->stmt = $this->dbh->prepare(
 			'SELECT * FROM Voucher WHERE removed = 0 AND client_id = :client_id AND id = :id'
 		);
 		$this->stmt->execute([':client_id' => $clientId, ':id' => $id]);
-		foreach($this->stmt->fetchAll(PDO::FETCH_CLASS, 'Voucher', [$this->getCurrencyByClient($clientId)]) as $voucher) {
+		foreach($this->stmt->fetchAll(PDO::FETCH_CLASS, 'Models\Voucher', [$this->getCurrencyByClient($clientId)]) as $voucher) {
 			return $voucher;
 		}
 	}
@@ -364,14 +365,14 @@ class db {
 			'SELECT * FROM Appointment WHERE client_id = :id AND last_modified_on_server > :diff_since'
 		);
 		$this->stmt->execute([':id' => $clientId, ':diff_since' => $diffSince]);
-		return $this->stmt->fetchAll(PDO::FETCH_CLASS, 'Appointment');
+		return $this->stmt->fetchAll(PDO::FETCH_CLASS, 'Models\Appointment');
 	}
 	public function getActiveAppointmentsByClient($clientId) {
 		$this->stmt = $this->dbh->prepare(
 			'SELECT * FROM Appointment WHERE removed = 0 AND client_id = :client_id'
 		);
 		$this->stmt->execute([':client_id' => $clientId]);
-		return $this->stmt->fetchAll(PDO::FETCH_CLASS, 'Appointment');
+		return $this->stmt->fetchAll(PDO::FETCH_CLASS, 'Models\Appointment');
 	}
 	public function insertUpdateAppointment($clientId, $id, $calendarId, $title, $notes, $timeStart, $timeEnd, $fullday, $customer, $customerId, $location, $lastModified, $removed) {
 
@@ -440,14 +441,14 @@ class db {
 			'SELECT * FROM Calendar WHERE client_id = :id AND last_modified_on_server > :diff_since'
 		);
 		$this->stmt->execute([':id' => $clientId, ':diff_since' => $diffSince]);
-		return $this->stmt->fetchAll(PDO::FETCH_CLASS, 'Calendar');
+		return $this->stmt->fetchAll(PDO::FETCH_CLASS, 'Models\Calendar');
 	}
 	public function getActiveCalendarsByClient($clientId) {
 		$this->stmt = $this->dbh->prepare(
 			'SELECT * FROM Calendar WHERE removed = 0 AND client_id = :client_id'
 		);
 		$this->stmt->execute([':client_id' => $clientId]);
-		return $this->stmt->fetchAll(PDO::FETCH_CLASS, 'Calendar');
+		return $this->stmt->fetchAll(PDO::FETCH_CLASS, 'Models\Calendar');
 	}
 	public function insertUpdateCalendar($clientId, $id, $title, $color, $notes, $lastModified, $removed) {
 
