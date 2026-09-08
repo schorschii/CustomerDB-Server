@@ -31,10 +31,20 @@ With this PHP web app you can set up your own server for the [Android](https://g
 6. After you created your personal account on your server, you may now want to disable the registration in `conf.php`.
 
 ## Further (Optional) Steps
-Especially if your server is available from the internet (and not only locally in your home network):
-- it is highly recommended to setup HTTPS on your web server
-- it is highly recommended to setup fail2ban on your web server (see [docs/fail2ban](docs/fail2ban/README.md) for more information)
-- you may want to disable the user registration in the `conf.php` file (you can also disable the API or the web frontend here)
+- Cleanup cronjobs:
+  ```
+  # delete users which do not have verified their email address after 5 days
+  0 1     * * *   www-data        php /var/www/customerdb/console.php cleanup-unverified-users 5 >/dev/null
+  # delete inactive users which do not have uploaded any data after 100 days
+  2 1     * * *   www-data        php /var/www/customerdb/console.php cleanup-inactive-users 100 1 >/dev/null
+  # delete inactivate users with uploaded data after 500 days
+  4 1     * * *   www-data        php /var/www/customerdb/console.php cleanup-inactive-users 500 0 >/dev/null
+  ```
+
+- Especially if your server is available from the internet (and not only locally in your home network):
+  - it is highly recommended to setup HTTPS on your web server
+  - it is highly recommended to setup fail2ban on your web server (see [docs/fail2ban](docs/fail2ban/README.md) for more information)
+  - you may want to disable the user registration in the `conf.php` file (you can also disable the API or the web frontend here)
 
 ## Upgrade
 For upgrading your server to a newer version, please read [Upgrade.md](docs/Upgrade.md).
