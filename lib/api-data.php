@@ -45,7 +45,7 @@ function handleApiRequestData($srcdata) {
 
 	// check cloud access license payment
 	$paymentOk = false;
-	if(CHECK_PAYMENT === false || $user->check_payment == 0) {
+	if(!defined('CHECK_PAYMENT') || CHECK_PAYMENT === false || $user->check_payment == 0) {
 		// special customers and self-hosted servers can use the sync for free
 		$paymentOk = true;
 	}
