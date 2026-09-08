@@ -12,7 +12,7 @@ const NS_CALENDARSERVER = 'http://calendarserver.org/ns/';
 
 const CARDDAV_API_ERROR_TEXT = 'This is a CardDAV API and can therefore only be used with a CardDAV client and not with normal web browsers.';
 
-require_once('../lib/loader.php');
+require_once('../loader.inc.php');
 if(!API_ENABLED) die('API is disabled');
 
 // no XML parser warnings in error logs

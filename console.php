@@ -6,7 +6,7 @@ if(php_sapi_name() != 'cli')
 if(!isset($argv[1]))
 	die('Please specify an action as first parameter (createuser|listuser|changeuserpasswd|deleteuser).'."\n");
 
-require_once('lib/loader.php');
+require_once('loader.inc.php');
 
 try {
 

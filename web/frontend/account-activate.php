@@ -1,5 +1,5 @@
 <?php
-require_once('../../lib/loader.php');
+require_once('../../loader.inc.php');
 
 // unlock account (email link)
 $info = LANG['invalid_request'];

@@ -1,6 +1,6 @@
 <?php
 require_once('session.php');
-require_once('../../lib/loader.php');
+require_once('../../loader.inc.php');
 if(!FRONTEND_ENABLED) die();
 
 $view = 'start';

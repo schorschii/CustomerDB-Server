@@ -1,5 +1,5 @@
 <?php
-require_once('../lib/loader.php');
+require_once('../loader.inc.php');
 if(!API_ENABLED) die('API is disabled');
 
 // check content type
