@@ -1,3 +1,3 @@
 <div id="foot">
-	<?php echo LANG['copyright_note']; ?>
+	© <?php echo date('Y'); ?>
 </div>

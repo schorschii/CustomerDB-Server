@@ -3,7 +3,6 @@ const LANG = [
 	'app_name' => 'Base de données clients',
 	'app_subtitle' => 'web',
 	'vendor' => 'Sieber Systems',
-	'copyright_note' => '© 2020',
 	'email_address' => 'Adresse électronique',
 	'password' => 'Mot de passe',
 	'login' => "S'identifier",
