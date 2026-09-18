@@ -51,7 +51,7 @@ function handleApiRequestData($srcdata) {
 	}
 	elseif(!empty($srcdata['params']['appstore_receipt'])) {
 		// check against Apple AppStore (legacy)
-		$as = new Apple\AppStore(APPSTORE_SECRET);
+		$as = new Store\AppStore(APPSTORE_SECRET);
 		if($as->checkAppStore($srcdata['params']['appstore_receipt'], APPSTORE_PRODUCTID, true)
 		|| $as->checkAppStore($srcdata['params']['appstore_receipt'], APPSTORE_PRODUCTID, false)) {
 			$paymentOk = true;
@@ -59,7 +59,7 @@ function handleApiRequestData($srcdata) {
 	}
 	elseif(!empty($srcdata['params']['appstore_transaction'])) {
 		// check against Apple StoreKit API
-		$sk = new Apple\StoreKit(STOREKIT_ISSUER_ID, STOREKIT_KEY_ID, STOREKIT_KEY);
+		$sk = new Store\StoreKit(STOREKIT_ISSUER_ID, STOREKIT_KEY_ID, STOREKIT_KEY);
 		if($sk->checkStoreKit(APPSTORE_BUNDLEID, $srcdata['params']['appstore_transaction'], true)
 		|| $sk->checkStoreKit(APPSTORE_BUNDLEID, $srcdata['params']['appstore_transaction'], false)) {
 			$paymentOk = true;
@@ -67,7 +67,7 @@ function handleApiRequestData($srcdata) {
 	}
 	elseif(!empty($srcdata['params']['playstore_token'])) {
 		// check against Google PlayStore
-		$ps = new Google\PlayStore(PLAYSTORE_AUTH);
+		$ps = new Store\PlayStore(PLAYSTORE_AUTH);
 		if($ps->checkPlayStore($srcdata['params']['playstore_token'], PLAYSTORE_APPID, PLAYSTORE_SKUID)) {
 			$paymentOk = true;
 		}

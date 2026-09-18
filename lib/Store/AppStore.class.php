@@ -1,6 +1,6 @@
 <?php
 
-namespace Apple;
+namespace Store;
 
 class AppStore {
 

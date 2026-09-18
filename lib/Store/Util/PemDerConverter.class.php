@@ -1,6 +1,6 @@
 <?php
 
-namespace Apple\Util;
+namespace Store\Util;
 
 class PemDerConverter {
 

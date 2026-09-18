@@ -1,10 +1,13 @@
 <?php
 
-namespace Google;
+namespace Store;
 
-use \Apple\Util\JsonWebToken as JsonWebToken;
+use Util\JsonWebToken as JsonWebToken;
 
 class PlayStore {
+
+	const TOKEN_URL        = 'https://www.googleapis.com/oauth2/v4/token';
+	const PLAYSTORE_URL    = 'https://androidpublisher.googleapis.com';
 
 	const TOKEN_CACHE_PATH = '/tmp/google-token-cache.json';
 
@@ -37,15 +40,17 @@ class PlayStore {
 		return $token['access_token'];
 	}
 	private function getAccessToken() {
+		$jwt = JsonWebToken::generateJwt('RS256',
+			$creds['private_key'], $creds['private_key_id'], $creds['client_email'],
+			'https://www.googleapis.com/oauth2/v4/token',
+			null,
+			'https://www.googleapis.com/auth/androidpublisher',
+		);
+
 		$creds = json_decode($this->mAuthConfig, true);
-		$token = $this->apiCall('POST', 'https://www.googleapis.com/oauth2/v4/token', http_build_query([
+		$token = $this->apiCall('POST', self::TOKEN_URL, http_build_query([
 			'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
-			'assertion' => JsonWebToken::generateJwt('RS256',
-				$creds['private_key'], $creds['private_key_id'], $creds['client_email'],
-				'https://www.googleapis.com/oauth2/v4/token',
-				null,
-				'https://www.googleapis.com/auth/androidpublisher',
-			)
+			'assertion' => $jwt,
 		]), 200, []);
 		if(empty($token['access_token'])
 		|| empty($token['expires_in']))
@@ -60,7 +65,7 @@ class PlayStore {
 		curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		#curl_setopt($ch, CURLOPT_VERBOSE, true);
-		curl_setopt($ch, CURLOPT_HTTPHEADER, 
+		curl_setopt($ch, CURLOPT_HTTPHEADER,
 			$header===null ? [
 				'Authorization: Bearer '.$this->aquireAccessToken(),
 				'Content-Type: application/json',
@@ -87,7 +92,7 @@ class PlayStore {
 	function checkPlayStore($token, $appId, $productId) {
 		try {
 			$purchase = $this->apiCall('GET',
-				'https://androidpublisher.googleapis.com/androidpublisher/v3/applications/'.urlencode($appId).'/purchases/subscriptionsv2/tokens/'.urlencode($token)
+				self::PLAYSTORE_URL.'/androidpublisher/v3/applications/'.urlencode($appId).'/purchases/subscriptionsv2/tokens/'.urlencode($token)
 			);
 			foreach(($purchase['lineItems'] ?? []) as $item) {
 				if(($item['productId'] ?? null) === $productId) {

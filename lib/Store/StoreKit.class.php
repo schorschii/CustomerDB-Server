@@ -1,6 +1,8 @@
 <?php
 
-namespace Apple;
+namespace Store;
+
+use Util\JsonWebToken as JsonWebToken;
 
 class StoreKit {
 
@@ -37,7 +39,7 @@ class StoreKit {
 
 	function getTransaction($bundleId, $transactionId, $production=true) {
 		// build JWT for authentication
-		$jwt = Util\JsonWebToken::generateJwt(
+		$jwt = JsonWebToken::generateJwt(
 			'ES256', $this->mKey, $this->mKeyId, $this->mIssuerId, 'appstoreconnect-v1', $bundleId
 		);
 
@@ -72,7 +74,7 @@ class StoreKit {
 			throw new \RuntimeException('Invalid JWS');
 
 		$transaction = json_decode(
-			Util\JsonWebToken::base64UrlDecode($parts[1]),
+			JsonWebToken::base64UrlDecode($parts[1]),
 			true, 512, JSON_THROW_ON_ERROR
 		);
 

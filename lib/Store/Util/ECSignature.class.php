@@ -11,7 +11,7 @@
  * @link https://github.com/web-token/jwt-framework/blob/v1.2/src/Component/Core/Util/ECSignature.php
  */
 
-namespace Apple\Util;
+namespace Store\Util;
 
 /**
 * @internal
